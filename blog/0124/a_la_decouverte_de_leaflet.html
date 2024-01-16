@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A la découverte de Leaflet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 40%;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>A la découverte de Leaflet</h1>
+
+    <p>Leaflet est une bibliothèque JavaScript légère et simple à utiliser pour créer des cartes interactives dans vos applications web. Elle offre une interface conviviale et des fonctionnalités puissantes pour l'affichage de cartes, le marquage de points, la gestion des événements, et bien plus encore.</p>
+
+    <h2>Installation de Leaflet</h2>
+
+    <p>Pour commencer, ajoutez la bibliothèque Leaflet à votre projet en incluant le fichier CSS et JavaScript :</p>
+
+    <pre>
+        <code>
+            &lt;link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /&gt;
+            &lt;script src="https://unpkg.com/leaflet/dist/leaflet.js"&gt;&lt;/script&gt;
+        </code>
+    </pre>
+
+    <h2>Création d'une carte simple</h2>
+
+    <p>Utilisez le code suivant pour créer une carte Leaflet de base :</p>
+
+    <pre>
+        <code>
+            // Initialisation de la carte
+            var map = L.map('map').setView([48.8566, 2.3522], 13);
+
+            // Ajout d'une couche de tuiles OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        </code>
+    </pre>
+
+    <div id="map"></div>
+
+    <h2>Marquer un emplacement sur la carte</h2>
+
+    <p>Vous pouvez ajouter des marqueurs à la carte pour indiquer des emplacements spécifiques :</p>
+
+    <pre>
+        <code>
+            // Ajout d'un marqueur à un emplacement spécifique
+            var marker = L.marker([48.8566, 2.3522]).addTo(map);
+            marker.bindPopup('Paris, France').openPopup();
+        </code>
+    </pre>
+
+    <p>Ceci ajoutera un marqueur et une infobulle</p>
+
+</body>
+</html>
+
+<script>
+  // Initialisation de la carte
+  var map = L.map('map').setView([50.6095117,3.1379585], 13);
+
+  // Ajout d'une couche de tuiles OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Ajout d'un marqueur à un emplacement spécifique
+  var marker = L.marker([50.6095117,3.1379585]).addTo(map);
+  marker.bindPopup('Bâtiment M5').openPopup();
+</script>
