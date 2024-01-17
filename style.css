@@ -31,3 +31,9 @@ a {
     color: #ffffff;
     /* Texte bleu */
 }
+
+#cat {
+    position: absolute;
+    right: 0;
+    top: -1px;
+}
