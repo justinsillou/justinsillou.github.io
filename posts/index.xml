@@ -2,19 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Posts on Justin Sillou</title>
-    <link>http://localhost:1313/posts/</link>
+    <link>https://justinsillou.github.io/posts/</link>
     <description>Recent content in Posts on Justin Sillou</description>
     <generator>Hugo -- 0.147.9</generator>
     <language>fr-fr</language>
     <lastBuildDate>Sat, 05 Jul 2025 11:00:00 +0200</lastBuildDate>
-    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://justinsillou.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Créer un site avec Hugo et le déployer sur GitHub Pages</title>
-      <link>http://localhost:1313/posts/creation-site-hugo-github/</link>
+      <link>https://justinsillou.github.io/posts/creation-site-hugo-github/</link>
       <pubDate>Sat, 05 Jul 2025 11:00:00 +0200</pubDate>
-      <guid>http://localhost:1313/posts/creation-site-hugo-github/</guid>
-      <description>&lt;h1 id=&#34;créer-un-site-avec-hugo-et-le-déployer-sur-github-pages&#34;&gt;Créer un site avec Hugo et le déployer sur GitHub Pages&lt;/h1&gt;
-&lt;p&gt;Dans cet article, je vais vous expliquer comment créer un site statique avec Hugo, un générateur de sites rapide et moderne, puis comment le publier gratuitement avec GitHub Pages.&lt;/p&gt;
+      <guid>https://justinsillou.github.io/posts/creation-site-hugo-github/</guid>
+      <description>&lt;p&gt;Dans cet article, je vais vous expliquer comment créer un site statique avec Hugo, un générateur de sites rapide et moderne, puis comment le publier gratuitement avec GitHub Pages.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;prérequis&#34;&gt;Prérequis&lt;/h2&gt;
 &lt;ul&gt;
@@ -32,7 +31,21 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;2&#34;&gt;
 &lt;li&gt;&lt;strong&gt;Ajouter un thème :&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;Ici j’utilise PaperMod, un thème simple et moderne.&lt;/p&gt;</description>
+&lt;p&gt;Ici j’utilise PaperMod, un thème simple et moderne.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git init
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git submodule add https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Configurer le fichier &lt;code&gt;config.toml&lt;/code&gt;&lt;/strong&gt;&lt;br&gt;
+Ajouter au moins :&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-toml&#34; data-lang=&#34;toml&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;baseURL&lt;/span&gt; = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;https://votre-utilisateur.github.io/&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;languageCode&lt;/span&gt; = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;fr-fr&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;title&lt;/span&gt; = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Mon site Hugo&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;theme&lt;/span&gt; = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;PaperMod&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;&lt;strong&gt;Créer du contenu&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Par exemple un premier article :&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

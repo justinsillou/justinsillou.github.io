@@ -2,24 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Justin Sillou</title>
-    <link>http://localhost:1313/</link>
+    <link>https://justinsillou.github.io/</link>
     <description>Recent content on Justin Sillou</description>
     <generator>Hugo -- 0.147.9</generator>
     <language>fr-fr</language>
     <lastBuildDate>Sat, 05 Jul 2025 11:27:08 +0200</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://justinsillou.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
-      <link>http://localhost:1313/about/</link>
+      <link>https://justinsillou.github.io/about/</link>
       <pubDate>Sat, 05 Jul 2025 11:27:08 +0200</pubDate>
-      <guid>http://localhost:1313/about/</guid>
+      <guid>https://justinsillou.github.io/about/</guid>
       <description></description>
     </item>
     <item>
       <title>Créer un site avec Hugo et le déployer sur GitHub Pages</title>
-      <link>http://localhost:1313/posts/creation-site-hugo-github/</link>
+      <link>https://justinsillou.github.io/posts/creation-site-hugo-github/</link>
       <pubDate>Sat, 05 Jul 2025 11:00:00 +0200</pubDate>
-      <guid>http://localhost:1313/posts/creation-site-hugo-github/</guid>
+      <guid>https://justinsillou.github.io/posts/creation-site-hugo-github/</guid>
       <description>&lt;p&gt;Dans cet article, je vais vous expliquer comment créer un site statique avec Hugo, un générateur de sites rapide et moderne, puis comment le publier gratuitement avec GitHub Pages.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;prérequis&#34;&gt;Prérequis&lt;/h2&gt;
