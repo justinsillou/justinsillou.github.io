@@ -1,11 +1,41 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import "../styles/global.css";
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ça mijote… Site en maintenance</title>
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body
+    class="bg-gradient-to-br from-purple-800 via-indigo-700 to-pink-700 flex items-center justify-center min-h-screen text-white"
+  >
+    <div class="text-center px-6 md:px-0 max-w-lg">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">🧙 Ça mijote…</h1>
+      <p class="text-lg md:text-xl mb-4">C'est bientôt prêt ! Patience…</p>
+      <p class="mb-8">En attendant, retrouve-moi sur :</p>
+
+      <div class="flex justify-center gap-4">
+        <a
+          href="https://github.com/justinsillou"
+          target="_blank"
+          class="bg-white text-purple-800 font-bold px-4 py-2 rounded-lg shadow-lg hover:bg-purple-100 transition"
+          >GitHub</a
+        >
+        <a
+          href="https://www.linkedin.com/in/justinsillou/"
+          target="_blank"
+          class="bg-white text-purple-800 font-bold px-4 py-2 rounded-lg shadow-lg hover:bg-purple-100 transition"
+          >LinkedIn</a
+        >
+        <a
+          href="mailto:justinsillou@gmail.com"
+          class="bg-white text-purple-800 font-bold px-4 py-2 rounded-lg shadow-lg hover:bg-purple-100 transition"
+          >Mail</a
+        >
+      </div>
+    </div>
+  </body>
+</html>
