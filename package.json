@@ -1,7 +1,7 @@
 {
   "name": "justinsillou.github.io",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.2",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.12",
-    "astro": "^5.13.2",
+    "astro": "^5.14.8",
     "tailwindcss": "^4.1.12"
   }
 }
