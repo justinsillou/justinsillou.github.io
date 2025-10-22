@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@theme {
+    /* Un beige clair pour le fond, agréable et neutre */
+    --color-background: oklch(0.95 0.02 90);
+    /* Un texte gris chaud légèrement contrasté */
+    --color-text: oklch(0.35 0.02 50);
+}
