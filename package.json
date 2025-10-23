@@ -1,7 +1,7 @@
 {
   "name": "justinsillou.github.io",
   "type": "module",
-  "version": "0.2",
+  "version": "0.3",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -9,8 +9,12 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/preact": "^4.1.1",
+    "@astrojs/rss": "^4.0.12",
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "@tailwindcss/vite": "^4.1.12",
-    "astro": "^5.14.8",
+    "astro": "^5.15.0",
+    "preact": "^10.27.2",
     "tailwindcss": "^4.1.12"
   }
 }

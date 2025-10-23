@@ -7,6 +7,16 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 - Initialisation du projet
 - Création de la branche `dev`
 
+## [0.3] - 2025-10-23
+
+### Changed
+
+- Montée de version d'Astro [v5.14.8 -> v5.15.0]
+
+### Added
+- Ajout du flux RSS pour le blog
+- Ajout de Preact et mise en place d'une Island pour les interactions client
+
 ## [0.2] - 2025-10-22
 
 ### Changed
