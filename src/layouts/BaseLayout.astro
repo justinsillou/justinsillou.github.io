@@ -13,9 +13,18 @@ const { pageTitle } = Astro.props;
     <title>{pageTitle}</title>
     <link rel="icon" href="/favicon.svg" />
   </head>
-  <body class="bg-background text-text leading-relaxed">
+  <body
+    class="bg-background text-text leading-relaxed min-h-screen grid grid-rows-[auto_1fr_auto]"
+  >
+    <!-- Header -->
     <Header />
-    <slot />
+
+    <!-- Contenu principal -->
+    <main class="px-4 py-10 max-w-7xl mx-auto w-full">
+      <slot />
+    </main>
+
+    <!-- Footer -->
     <Footer />
   </body>
 </html>

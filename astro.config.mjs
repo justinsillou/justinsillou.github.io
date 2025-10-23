@@ -1,6 +1,7 @@
 // astro.config.mjs
 import { defineConfig } from 'astro/config'
 import tailwindcss from '@tailwindcss/vite'
+import sitemap from '@astrojs/sitemap';
 
 import preact from '@astrojs/preact';
 
@@ -11,5 +12,6 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  integrations: [preact()],
+  integrations: [preact(), sitemap()],
+  middleware: ['./src/middleware.ts']
 })

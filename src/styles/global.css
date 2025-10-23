@@ -1,9 +1,61 @@
 @import "tailwindcss";
 @import "@fortawesome/fontawesome-free/css/all.min.css";
+@plugin '@tailwindcss/typography';
 
 @theme {
-    /* Un beige clair pour le fond, agréable et neutre */
+    /* Fond général du site (beige clair) */
     --color-background: oklch(0.95 0.02 90);
-    /* Un texte gris chaud légèrement contrasté */
+    /* #e0dece approximatif */
+
+    /* Texte principal (gris chaud) */
     --color-text: oklch(0.35 0.02 50);
+    /* gris chaud */
+
+    /* Header légèrement plus clair que le fond */
+    --color-header-bg: oklch(0.97 0.02 90);
+    /* #f5f3eb approximatif */
+
+    /* Liens (bleu pastel) */
+    --color-link: oklch(0.45 0.08 210);
+    /* #7ea9e1 approximatif */
+
+    /* Liens au survol */
+    --color-link-hover: oklch(0.35 0.08 210);
+    /* #5a7ec1 approximatif */
+
+    /* Footer, un peu plus foncé pour contraste léger */
+    --color-footer-bg: oklch(0.93 0.02 90);
+    /* #ece9df approximatif */
+}
+
+/* Appliquer les variables globalement */
+body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: system-ui, sans-serif;
+}
+
+/* Header */
+header {
+    background-color: var(--color-header-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Liens */
+a {
+    color: var(--color-link);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+}
+
+/* Footer */
+footer {
+    background-color: var(--color-footer-bg);
+    color: var(--color-text);
+    text-align: center;
 }

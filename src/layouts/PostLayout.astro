@@ -1,25 +1,79 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 const { frontmatter } = Astro.props;
+
+const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
+  "fr-FR",
+  {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }
+);
 ---
 
 <BaseLayout pageTitle={frontmatter.title}>
-  <p><em>{frontmatter.description}</em></p>
-  <p>{frontmatter.pubDate.toLocaleDateString()}</p>
-
-  <p>Written by: {frontmatter.author}</p>
-
-  <!-- <img src={frontmatter.image.url} width="300" alt={frontmatter.image.alt} /> -->
-
-  <div class="tags">
+  <article class="max-w-3xl mx-auto px-4 py-10">
+    <!-- Image de couverture -->
     {
-      frontmatter.tags.map((tag: string) => (
-        <p class="tag">
-          <a href={`/tags/${tag}`}>{tag}</a>
-        </p>
-      ))
+      frontmatter.image?.url && (
+        <img
+          src={frontmatter.image.url}
+          alt={frontmatter.image.alt || frontmatter.title}
+          class="w-full h-64 object-cover rounded-2xl shadow-md mb-8"
+        />
+      )
     }
-  </div>
 
-  <slot />
+    <!-- Titre -->
+    <h1 class="text-4xl font-bold text-gray-900 mb-3">{frontmatter.title}</h1>
+
+    <!-- Métadonnées -->
+    <div class="flex flex-wrap items-center text-sm text-gray-500 mb-6 gap-3">
+      <span>{formattedDate}</span>
+      {
+        frontmatter.author && (
+          <>
+            <span class="text-gray-400">•</span>
+            <span>
+              Écrit par{" "}
+              <span class="font-medium text-gray-700">
+                {frontmatter.author}
+              </span>
+            </span>
+          </>
+        )
+      }
+    </div>
+
+    <!-- Description -->
+    {
+      frontmatter.description && (
+        <p class="text-lg text-gray-700 italic mb-8 border-l-4 border-blue-400 pl-4">
+          {frontmatter.description}
+        </p>
+      )
+    }
+
+    <!-- Contenu principal -->
+    <div class="prose prose-lg max-w-none">
+      <slot />
+    </div>
+
+    <!-- Tags -->
+    {
+      frontmatter.tags && frontmatter.tags.length > 0 && (
+        <div class="mt-10 flex flex-wrap gap-3">
+          {frontmatter.tags.map((tag: string) => (
+            <a
+              href={`/tags/${tag}`}
+              class="bg-blue-100 text-blue-600 text-sm px-3 py-1 rounded-full hover:bg-blue-200 transition"
+            >
+              #{tag}
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </article>
 </BaseLayout>
