@@ -56,7 +56,7 @@ En conclusion, si vous cherchez à créer un site web rapide et moderne en 2025,
 
 [^6] What's new in Astro - September 2025 - https://astro.build/blog/whats-new-september-2025/
 
-[^7] X Post by @michaelbe812 - https://x.com/michaelbe812/status/1983048020015845514
+[^s7] X Post by @michaelbe812 - https://x.com/michaelbe812/status/1983048020015845514
 
 [8] X Post by @itsjatin135s - https://x.com/itsjatin135s/status/1976377993686810705
 
