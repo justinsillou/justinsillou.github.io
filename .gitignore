@@ -3,6 +3,7 @@ dist/
 
 # generated types
 .astro/
+.sonda/
 
 # dependencies
 node_modules/

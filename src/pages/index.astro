@@ -1,9 +1,23 @@
 ---
+// src/pages/index.astro
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Greeting from "../components/Greeting";
-const pageTitle = "Ça mijote ...";
+import TardisFollower from "../components/TardisFollower";
+
+const pageTitle = "Justin S. | dev";
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-  <!-- <Greeting client:load messages={["Hi", "Hello", "Howdy", "Hey there"]} /> -->
+  <div
+    class="relative flex flex-col justify-center items-center h-full text-center overflow-hidden"
+  >
+    <!-- Texte statique (pas d'hydratation) -->
+    <h1
+      class="relative z-10 text-7xl md:text-8xl font-black text-link tracking-tight select-none"
+    >
+      Allons-y !
+    </h1>
+
+    <!-- Island : seul le TARDIS s'hydrate et s'anime -->
+    <TardisFollower client:load />
+  </div>
 </BaseLayout>
