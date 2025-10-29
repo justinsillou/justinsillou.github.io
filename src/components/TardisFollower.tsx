@@ -5,36 +5,42 @@ import gsap from "gsap";
 
 export default function TardisFollower() {
   const tardisRef = useRef<SVGSVGElement>(null);
+  const lastX = useRef(0);
 
   useEffect(() => {
     const tardis = tardisRef.current;
     if (!tardis) return;
 
-    // Taille du TARDIS (64px)
     const width = 64;
     const height = 64;
 
     const onMove = (e: MouseEvent) => {
-      // Position de la souris dans le viewport
       const mouseX = e.clientX;
       const mouseY = e.clientY;
 
-      // Centrer le TARDIS sur la souris
-      const x = mouseX - width / 2;
-      const y = mouseY - height / 2;
+      // Déplacement aléatoire léger pour effet "drift"
+      const driftX = (Math.random() - 0.5) * 20;
+      const driftY = (Math.random() - 0.5) * 20;
+      const x = mouseX - width / 2 + driftX;
+      const y = mouseY - height / 2 + driftY;
+
+      // Balancement : direction du mouvement
+      const dx = mouseX - lastX.current;
+      const rotation = dx * 0.3 + (Math.random() - 0.5) * 5; // rotation selon mouvement + léger aléatoire
+
+      lastX.current = mouseX;
 
       gsap.to(tardis, {
         x,
         y,
+        rotation,
         duration: 0.4,
         ease: "power3.out",
-        overwrite: "auto", // évite les conflits d'animation
+        overwrite: "auto",
       });
     };
 
-    // Écoute globale
     window.addEventListener("mousemove", onMove);
-
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
@@ -42,19 +48,18 @@ export default function TardisFollower() {
     <svg
       ref={tardisRef}
       viewBox="0 0 72 72"
-      className="fixed pointer-events-none opacity-90 z-50"
+      className="fixed pointer-events-none opacity-90 z-0" // z-10 pour passer derrière header/footer
       style={{
         width: "64px",
         height: "64px",
         filter: "drop-shadow(0 0 12px rgba(0, 255, 255, 0.6))",
-        // Position initiale : top-left du SVG (GSAP gère le translate)
         top: 0,
         left: 0,
-        transform: "translate(0px, 0px)", // GSAP écrase ça
+        transform: "translate(0px, 0px)",
       }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Ton SVG TARDIS (inchangé) */}
+      {/* SVG TARDIS inchangé */}
       <g id="color">
         <rect x="25" y="12" rx="1" width="21" height="5" fill="#1e50a0" />
         <rect x="23" y="16" rx="1" width="26" height="48" fill="#1e50a0" />
