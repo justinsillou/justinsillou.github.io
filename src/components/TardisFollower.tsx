@@ -1,59 +1,60 @@
-import { useState, useEffect, useRef } from "preact/hooks";
+'use client'
+
+import { useEffect, useRef } from "preact/hooks";
+import gsap from "gsap";
 
 export default function TardisFollower() {
   const tardisRef = useRef<SVGSVGElement>(null);
-  const mouseX = useRef(0);
-  const mouseY = useRef(0);
-  const currentX = useRef(0);
-  const currentY = useRef(0);
-  const speed = 0.08; // 0.05 = très lent, 0.1 = fluide, 0.2 = réactif
 
   useEffect(() => {
     const tardis = tardisRef.current;
     if (!tardis) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = tardis.parentElement?.getBoundingClientRect();
-      if (!rect) return;
+    // Taille du TARDIS (64px)
+    const width = 64;
+    const height = 64;
 
-      // Centre de la souris dans le conteneur
-      mouseX.current = e.clientX - rect.left - tardis.clientWidth / 2;
-      mouseY.current = e.clientY - rect.top - tardis.clientHeight / 2;
+    const onMove = (e: MouseEvent) => {
+      // Position de la souris dans le viewport
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      // Centrer le TARDIS sur la souris
+      const x = mouseX - width / 2;
+      const y = mouseY - height / 2;
+
+      gsap.to(tardis, {
+        x,
+        y,
+        duration: 0.4,
+        ease: "power3.out",
+        overwrite: "auto", // évite les conflits d'animation
+      });
     };
 
-    const updatePosition = () => {
-      // Lissage exponentiel → "drift"
-      currentX.current += (mouseX.current - currentX.current) * speed;
-      currentY.current += (mouseY.current - currentY.current) * speed;
+    // Écoute globale
+    window.addEventListener("mousemove", onMove);
 
-      tardis.style.transform = `translate(${currentX.current}px, ${currentY.current}px)`;
-
-      requestAnimationFrame(updatePosition);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    updatePosition();
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
+    return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
   return (
     <svg
       ref={tardisRef}
       viewBox="0 0 72 72"
-      className="absolute pointer-events-none opacity-85 transition-opacity duration-300"
+      className="fixed pointer-events-none opacity-90 z-50"
       style={{
-        width: '64px',
-        height: '64px',
-        filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.4))',
+        width: "64px",
+        height: "64px",
+        filter: "drop-shadow(0 0 12px rgba(0, 255, 255, 0.6))",
+        // Position initiale : top-left du SVG (GSAP gère le translate)
         top: 0,
         left: 0,
+        transform: "translate(0px, 0px)", // GSAP écrase ça
       }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* === TARDIS SVG (identique) === */}
+      {/* Ton SVG TARDIS (inchangé) */}
       <g id="color">
         <rect x="25" y="12" rx="1" width="21" height="5" fill="#1e50a0" />
         <rect x="23" y="16" rx="1" width="26" height="48" fill="#1e50a0" />
