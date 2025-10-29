@@ -13,6 +13,7 @@
     "@astrojs/rss": "^4.0.13",
     "@astrojs/sitemap": "^3.6.0",
     "@fortawesome/fontawesome-free": "^7.1.0",
+    "@microsoft/clarity": "^1.0.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.12",
     "astro": "^5.15.0",
