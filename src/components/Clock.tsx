@@ -40,7 +40,7 @@ export default function Clock() {
         </>
       ) : (
         <>
-        <div class="flex flex-col items-center md:flex-row md:items-baseline md:gap-4">
+        <div class="flex flex-col items-center">
             <span class="text-sm font-light capitalize">{dateString}</span>
             <span class="text-2xl font-semibold">{timeString}</span>
         </div>

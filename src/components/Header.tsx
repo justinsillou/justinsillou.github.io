@@ -16,7 +16,6 @@ export default function Header() {
           <nav className="hidden sm:flex gap-6">
             <a href="/now" className="hover:text-primary">Now</a>
             <a href="/blog" className="hover:text-primary">Blog</a>
-            <a href="/contact" className="hover:text-primary">Contact</a>
           </nav>
 
           {/* Bouton mobile */}
@@ -34,7 +33,6 @@ export default function Header() {
           <nav className="sm:hidden flex flex-col gap-2 pb-4 pt-4 border-t border-gray-200">
             <a href="/now" className="hover:text-primary">Now</a>
             <a href="/blog" className="hover:text-primary">Blog</a>
-            <a href="/contact" className="hover:text-primary">Contact</a>
           </nav>
         )}
       </div>
