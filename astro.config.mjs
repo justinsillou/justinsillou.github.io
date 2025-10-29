@@ -6,6 +6,8 @@ import Sonda from 'sonda/astro';
 
 import preact from '@astrojs/preact';
 
+import rehypeFootnotesRemoveTitle from "./src/plugins/rehype-footnotes-remove-title.js";
+
 export default defineConfig({
   site: 'https://justinsillou.github.io',
 
@@ -17,6 +19,11 @@ export default defineConfig({
       sourcemap: true
     }
   },
+
+  /*markdown: {
+    rehypePlugins: [rehypeFootnotesRemoveTitle],
+  },*/
+
 
   integrations: [preact(), sitemap(), Sonda()]
 })

@@ -4,33 +4,65 @@ const { frontmatter } = Astro.props;
 
 const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
   "fr-FR",
-  {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }
+  { year: "numeric", month: "long", day: "numeric" }
 );
 ---
 
 <BaseLayout pageTitle={frontmatter.title}>
-  <article class="max-w-3xl mx-auto px-4 py-10">
-    <!-- Image de couverture -->
+  <article class="max-w-3xl mx-auto w-full overflow-x-hidden">
+
+    {frontmatter.draft && (
+      <div class="w-full bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 px-4 py-2 mb-6 rounded flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <span class="font-semibold">⚠ Article en cours de rédaction</span>
+        <span class="text-sm text-yellow-900 mt-1 sm:mt-0">
+          Dernière modification : {new Date(frontmatter.derniereModification).toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric" })}
+        </span>
+      </div>
+    )}
+
+    <!-- 🖼️ Image de couverture -->
     {
       frontmatter.image?.url && (
-        <img
-          src={frontmatter.image.url}
-          alt={frontmatter.image.alt || frontmatter.title}
-          class="w-full h-64 object-cover rounded-2xl shadow-md mb-8"
-        />
+        <>
+          <img
+            src={frontmatter.image.url}
+            alt={frontmatter.image.alt || frontmatter.title}
+            class="w-full h-64 object-cover rounded-2xl shadow-md mb-2"
+          />
+
+          <!-- ✅ Mention de source / crédit -->
+          {(frontmatter.image.source || frontmatter.image.credit) && (
+            <p class="text-sm text-gray-500 italic mb-8">
+              Image principale : {frontmatter.image.alt || frontmatter.title}
+              {frontmatter.image.source && (
+                <>
+                  {" — "}
+                  <a
+                    href={frontmatter.image.source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="underline hover:text-blue-600"
+                  >
+                    {frontmatter.image.source}
+                  </a>
+                </>
+              )}
+              <br />
+              {frontmatter.image.credit && (
+                <span>(Source : {frontmatter.image.credit})</span>
+              )}
+            </p>
+          )}
+        </>
       )
     }
 
-    <!-- Titre -->
+    <!-- 📝 Titre -->
     <h1 class="text-4xl font-bold text-gray-900 mb-3">{frontmatter.title}</h1>
 
-    <!-- Métadonnées -->
+    <!-- 📅 Métadonnées -->
     <div class="flex flex-wrap items-center text-sm text-gray-500 mb-6 gap-3">
-      <span>{formattedDate}</span>
+      {frontmatter.draft ? <span>Date non déterminée</span> : <span>{formattedDate}</span>}
       {
         frontmatter.author && (
           <>
@@ -46,7 +78,7 @@ const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
       }
     </div>
 
-    <!-- Description -->
+    <!-- 💬 Description -->
     {
       frontmatter.description && (
         <p class="text-lg text-gray-700 italic mb-8 border-l-4 border-blue-400 pl-4">
@@ -55,15 +87,30 @@ const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
       )
     }
 
-    <!-- Contenu principal -->
-    <div class="prose prose-lg max-w-none">
+    <!-- Le contenu de ton article ici -->
+    <div class="max-w-full overflow-x-auto">
       <slot />
     </div>
 
-    <!-- Tags -->
+    <!-- 🤖 Mention IA (avant les tags) -->
+    {
+      frontmatter.IAGenerated && (
+        <div class="mt-8 mb-6 text-blue-700 flex items-center text-sm">
+          <span
+            class="inline-flex items-center justify-center w-5 h-5 mr-2 border border-blue-600 rounded-full font-semibold"
+            title="Information"
+          >
+            i
+          </span>
+          Cet article a été généré par l’IA.
+        </div>
+      )
+    }
+
+    <!-- 🏷️ Tags -->
     {
       frontmatter.tags && frontmatter.tags.length > 0 && (
-        <div class="mt-10 flex flex-wrap gap-3">
+        <div class="mt-4 flex flex-wrap gap-3">
           {frontmatter.tags.map((tag: string) => (
             <a
               href={`/tags/${tag}`}
