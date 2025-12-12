@@ -1,5 +1,11 @@
 ---
-const { title, url, description, image, tags, draft } = Astro.props;
+const { title, url, description, image, tags, draft, date } = Astro.props;
+
+const formattedDate = new Date(date).toLocaleDateString("fr-FR", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 ---
 
 <article
@@ -45,6 +51,8 @@ const { title, url, description, image, tags, draft } = Astro.props;
           </div>
         )
       }
+
+      <!-- {!draft && <div>{formattedDate}</div>} -->
     </div>
   </a>
 </article>
