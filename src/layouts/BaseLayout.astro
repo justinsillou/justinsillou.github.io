@@ -4,6 +4,8 @@ import Clarity from "@microsoft/clarity";
 import Header from "../components/Header";
 import Footer from "../components/Footer.astro";
 const { pageTitle } = Astro.props;
+
+import SnowParticles from "../components/SnowParticles.jsx";
 ---
 
 <!doctype html>
@@ -27,6 +29,9 @@ const { pageTitle } = Astro.props;
 
     <!-- Footer -->
     <Footer />
+
+    <SnowParticles client:only="preact" />
+
     <script type="text/javascript">
       (function (c, l, a, r, i, t, y) {
         c[a] =
