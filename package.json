@@ -20,7 +20,10 @@
     "gsap": "^3.13.0",
     "lucide-preact": "^0.548.0",
     "preact": "^10.27.2",
-    "tailwindcss": "^4.1.12"
+    "tailwindcss": "^4.1.12",
+    "tsparticles": "^3.9.1",
+    "tsparticles-engine": "^2.12.0",
+    "tsparticles-slim": "^2.12.0"
   },
   "devDependencies": {
     "sonda": "^0.9.0"
