@@ -1,0 +1,316 @@
+---
+// Timeline V1.0 -- Composant Astro pour afficher une timeline de formation et d'expérience professionnelle
+// Auteur : Justin Sillou
+
+// Définition des types
+type Organization = {
+  name: string;
+  logo?: string;
+  link?: string;
+  icon?: string;
+};
+
+type TimelineEvent = {
+  startDate?: string;
+  endDate?: string | null;
+  title: string;
+  organization?: string;
+  organizations?: Organization[];
+  description?: string;
+  logo?: string;
+  link?: string;
+  details?: string;
+  contractType?: string;
+  icon?: string;
+  diplomaLink?: string;
+  projectLink?: string; // Nouveau : lien vers projets/portfolio
+};
+
+type TimelineSection = {
+  section: string;
+  events: TimelineEvent[];
+};
+
+const timeline: TimelineSection[] = [
+  {
+    section: "Formation",
+    events: [
+      { 
+        startDate: "",
+        endDate: "", 
+        title: "Licence, Informatique", 
+        organization: "Université de Lille",
+        description: "",
+        logo: "/logos/universite-lille.png",
+        link: "https://www.univ-lille.fr",
+        diplomaLink: "https://diplome-certificat.univ-lille.fr/index.html?key=8F449EDDB7A37213CE6EA7553DEFEB993E65F275F47CE06702A419391B056694MkVWYW9uMlFDUHlvY0pTaE9vVkNMcWhBZUkxeTlQSEZqeGJHQXY0RDk0UmlrZzdx",
+        details: "",
+        contractType: ""
+      },
+      { 
+        startDate: "",
+        endDate: "", 
+        title: "Master, Informatique - Parcours E-Services", 
+        organization: "Université de Lille",
+        description: "",
+        logo: "/logos/universite-lille.png",
+        link: "https://www.univ-lille.fr",
+        diplomaLink: "https://diplome-certificat.univ-lille.fr/index.html?key=D12824758A4F95CAC319D56AFFFD13ED9E29127428FF06E484826448207792D2YXlkMXltWTRCd1J2QXRXMTE1SkFUQzRmWnBTbVFBYjRnNGtQa2Z1UCtJRDl6elBI",
+        projectLink: "/portfolio#local-et-toi",
+        details: "Projet : Application mobile Local & Toi (Projet Platine) - Développement Fullstack, méthodologie Agile.",
+        icon: "🎓",
+        contractType: ""
+      },
+    ]
+  },
+  {
+    section: "Expérience professionnelle",
+    events: [
+      { 
+        startDate: "Sept. 2022",
+        endDate: "Août 2024",
+        title: "Alternant - Développeur Backend", 
+        organization: "Promatec",
+        contractType: "Alternance",
+        description: "",
+        logo: "/logos/promatec.png",
+        link: "https://promatec.cloud/",
+        details: "",
+      },
+      { 
+        startDate: "Sept. 2024",
+        endDate: null,
+        title: "Développeur Backend",
+        contractType: "CDI",
+        description: "",
+        details: "",
+        organizations: [
+          {
+            name: "Mailsecure",
+            logo: "/logos/mailsecure.png",
+            link: "https://mail-secure.fr/",
+            icon: "✉️"
+          },
+          {
+            name: "Promatec Digital",
+            logo: "/logos/promatec-digital.png",
+            link: "https://promatec.digital/",
+            icon: "💡"
+          }
+        ]
+      },
+    ]
+  }
+];
+
+// Fonction pour formater la période
+const formatPeriod = (start?: string | null, end?: string | null): string => {
+  if (!start && !end) return '';
+  if (!start) return end || '';
+  if (!end) return `${start} - En cours`;
+  return `${start} - ${end}`;
+};
+
+// Styles pour les types de contrat
+const contractStyles: Record<string, string> = {
+  'CDI': 'bg-green-100 text-green-800',
+  'CDD': 'bg-blue-100 text-blue-800',
+  'Alternance': 'bg-purple-100 text-purple-800',
+  'Stage': 'bg-orange-100 text-orange-800',
+  'Freelance': 'bg-yellow-100 text-yellow-800',
+};
+---
+
+<div class="space-y-12">
+  {timeline.map((section) => (
+    <div>
+      <!-- En-tête de section -->
+      <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="h-1 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded mr-3"></span>
+        {section.section}
+      </h3>
+      
+      <!-- Liste des événements -->
+      <div class="flow-root">
+        <ul role="list" class="-mb-8">
+          {section.events.map((event, idx) => (
+            <li>
+              <div class="relative pb-8">
+                {idx !== section.events.length - 1 && (
+                  <span class="absolute left-5 top-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                )}
+                
+                <div class="relative flex items-start space-x-3">
+                  <!-- Logo unique ou logos multiples empilés -->
+                  <div class="relative flex-shrink-0">
+                    {event.organizations ? (
+                      // Logos empilés pour organisations multiples - taille adaptée
+                      <div class="relative" style={`width: ${(event.organizations.length - 1) * 16 + 40}px; height: ${(event.organizations.length - 1) * 8 + 40}px;`}>
+                        {event.organizations.map((org, orgIdx) => (
+                          <div 
+                            class="absolute transition-all duration-200 hover:z-10"
+                            style={`left: ${orgIdx * 16}px; top: ${orgIdx * 8}px;`}
+                          >
+                            {org.logo ? (
+                              <img 
+                                src={org.logo} 
+                                alt={org.name}
+                                class="h-10 w-10 rounded-full ring-4 ring-white bg-white object-cover shadow-sm hover:shadow-md transition-shadow"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                              />
+                            ) : null}
+                            <span 
+                              class={`h-10 w-10 rounded-full ${org.logo ? 'hidden' : 'flex'} bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center ring-4 ring-white text-white text-lg shadow-sm`}
+                              style={org.logo ? 'display: none;' : ''}
+                            >
+                              {org.icon || '📍'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      // Logo unique pour organisation simple
+                      <div class="relative">
+                        {event.logo ? (
+                          <img 
+                            src={event.logo} 
+                            alt={event.organization}
+                            class="h-10 w-10 rounded-full ring-8 ring-white bg-white object-cover"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                          />
+                        ) : null}
+                        <span 
+                          class={`h-10 w-10 rounded-full ${event.logo ? 'hidden' : 'flex'} bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center ring-8 ring-white text-white text-lg`}
+                          style={event.logo ? 'display: none;' : ''}
+                        >
+                          {event.icon || '📍'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <!-- Contenu -->
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <p class="text-base font-semibold text-gray-900">
+                            {event.title}
+                          </p>
+                          {event.contractType && (
+                            <span class={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${contractStyles[event.contractType] || 'bg-gray-100 text-gray-800'}`}>
+                              {event.contractType}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Organisation(s) */}
+                        {event.organizations ? (
+                          <div class="mt-0.5 flex items-center gap-1.5 flex-wrap">
+                            {event.organizations.map((org, orgIdx) => (
+                              <>
+                                {orgIdx > 0 && (
+                                  <span class="text-gray-400 text-sm">•</span>
+                                )}
+                                {org.link ? (
+                                  <a 
+                                    href={org.link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    class="text-sm font-medium text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 group"
+                                  >
+                                    {org.name}
+                                    <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                ) : (
+                                  <span class="text-sm font-medium text-blue-600">
+                                    {org.name}
+                                  </span>
+                                )}
+                              </>
+                            ))}
+                          </div>
+                        ) : (
+                          event.link ? (
+                            <a 
+                              href={event.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              class="mt-0.5 text-sm font-medium text-blue-600 hover:text-blue-800 inline-flex items-center gap-1 group"
+                            >
+                              {event.organization}
+                              <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <p class="mt-0.5 text-sm font-medium text-blue-600">
+                              {event.organization}
+                            </p>
+                          )
+                        )}
+                      </div>
+                      
+                      <!-- Date et liens -->
+                      <div class="flex-shrink-0 text-right space-y-2">
+                        {(event.startDate || event.endDate) && (
+                          <time class="block whitespace-nowrap text-sm text-gray-500 font-medium">
+                            {formatPeriod(event.startDate, event.endDate)}
+                          </time>
+                        )}
+                        
+                        {event.diplomaLink && (
+                          <a 
+                            href={event.diplomaLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group border border-blue-200"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <svg class="w-2.5 h-2.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        )}
+                        
+                        {event.projectLink && (
+                          <a 
+                            href={event.projectLink}
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group border border-purple-200"
+                          >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <svg class="w-2.5 h-2.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {event.description && (
+                      <p class="mt-2 text-sm text-gray-600">
+                        {event.description}
+                      </p>
+                    )}
+                    
+                    {event.details && (
+                      <div class="mt-2 text-sm text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        {event.details}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  ))}
+</div>
