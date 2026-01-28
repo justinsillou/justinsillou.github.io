@@ -1,10 +1,98 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Liste de projets
+const projects = [
+  {
+    title: "Villa Henrande",
+    date: "Septembre 2024",
+    description: "Création d'un site vitrine pour la Villa Henrande, optimisation SEO et design responsive.",
+    logo: "/portfolio/villa-henrande.png",
+    link: "https://villahenrande.fr/",
+    tags: ["Web", "HTML/CSS", "SEO", "Design"]
+  },
+  {
+    title: "Local & Toi",
+    date: "Sept. 2023",
+    description: "Projet étudiant de mise en relation commerçants locaux et clients.",
+    logo: "/portfolio/local-et-toi.png",
+    link: null,
+    tags: ["Flutter", "Figma", "Firebase"]
+  },
+  {
+    title: "Ce site",
+    date: "En cours",
+    description: "Mise en place de ce site.",
+    logo: null,
+    link: null,
+    tags: ["Web", "JS", "Github", "Astro"]
+  },
+];
 ---
 
 <BaseLayout title="Portfolio">
-  <main class="flex flex-col items-center justify-center h-[80vh] text-center">
-    <h1 class="text-4xl font-bold mb-4">Portfolio</h1>
-    <p class="text-xl text-gray-600">En cours de réalisation 🚧</p>
+  <main class="relative max-w-6xl mx-auto px-4 py-16">
+
+    <!-- CONTENU FLOUTÉ -->
+    <div class="blur-sm pointer-events-none select-none">
+      <h1 class="text-4xl font-bold text-center mb-12">Portfolio</h1>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        {projects.map(project => {
+          const Wrapper = project.link ? "a" : "div";
+          return (
+            <Wrapper
+              href={project.link || undefined}
+              target={project.link ? "_blank" : undefined}
+              rel={project.link ? "noopener noreferrer" : undefined}
+              class="flex items-start gap-4 bg-white rounded-2xl shadow-lg p-5 transition-transform group"
+            >
+              {/* Logo */}
+              {project.logo && (
+                <img
+                  src={project.logo}
+                  alt={project.title}
+                  class="h-16 w-16 object-contain rounded-lg bg-gray-50 p-2 shadow-sm flex-shrink-0"
+                />
+              )}
+
+              {/* Contenu */}
+              <div class="flex-1 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1">
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    {project.title}
+                  </h2>
+                  <time class="text-sm text-gray-500">{project.date}</time>
+                </div>
+
+                <p class="text-gray-600 text-sm mb-3">
+                  {project.description}
+                </p>
+
+                <div class="flex flex-wrap gap-2">
+                  {project.tags.map(tag => (
+                    <span class="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </Wrapper>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- OVERLAY -->
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl px-8 py-6 text-center max-w-md">
+        <p class="text-2xl font-semibold mb-2">🚧 Portfolio en construction</p>
+        <p class="text-gray-600">
+          Cette page est en cours de réalisation.<br />
+          Revenez plus tard !
+        </p>
+      </div>
+    </div>
+
   </main>
 </BaseLayout>
