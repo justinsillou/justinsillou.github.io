@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
+const pageTitle = "Portfolio";
+
 // Liste de projets
 const projects = [
   {
@@ -30,13 +32,11 @@ const projects = [
 ];
 ---
 
-<BaseLayout title="Portfolio">
+<BaseLayout pageTitle={pageTitle}>
   <main class="relative max-w-6xl mx-auto px-4 py-16">
 
     <!-- CONTENU FLOUTÉ -->
     <div class="blur-sm pointer-events-none select-none">
-      <h1 class="text-4xl font-bold text-center mb-12">Portfolio</h1>
-
       <div class="grid md:grid-cols-2 gap-8">
         {projects.map(project => {
           const Wrapper = project.link ? "a" : "div";
