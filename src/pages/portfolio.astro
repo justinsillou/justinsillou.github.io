@@ -9,7 +9,7 @@ const projects = [
     title: "Villa Henrande",
     date: "Septembre 2024",
     description: "Création d'un site vitrine pour la Villa Henrande, optimisation SEO et design responsive.",
-    logo: "/portfolio/villa-henrande.png",
+    logo: "assets/portfolio/villa-henrande.png",
     link: "https://villahenrande.fr/",
     tags: ["Web", "HTML/CSS", "SEO", "Design"]
   },
@@ -17,7 +17,7 @@ const projects = [
     title: "Local & Toi",
     date: "Sept. 2023",
     description: "Projet étudiant de mise en relation commerçants locaux et clients.",
-    logo: "/portfolio/local-et-toi.png",
+    logo: "assets/portfolio/local-et-toi.png",
     link: null,
     tags: ["Flutter", "Figma", "Firebase"]
   },
@@ -36,7 +36,7 @@ const projects = [
   <main class="relative max-w-6xl mx-auto px-4 py-16">
 
     <!-- CONTENU FLOUTÉ -->
-    <div class="blur-sm pointer-events-none select-none">
+    <div class="pointer-events-none select-none">
       <div class="grid md:grid-cols-2 gap-8">
         {projects.map(project => {
           const Wrapper = project.link ? "a" : "div";
@@ -84,6 +84,7 @@ const projects = [
     </div>
 
     <!-- OVERLAY -->
+    <!--
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl px-8 py-6 text-center max-w-md">
         <p class="text-2xl font-semibold mb-2">🚧 Portfolio en construction</p>
@@ -93,6 +94,7 @@ const projects = [
         </p>
       </div>
     </div>
+    -->
 
   </main>
 </BaseLayout>
