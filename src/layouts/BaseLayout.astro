@@ -2,6 +2,8 @@
 import BaseHeader from "../components/BaseHeader.astro";
 import BaseFooter from "../components/BaseFooter.astro";
 import BarryAllen from "../components/BarryAllen.astro";
+import BackToTop from "../components/BackToTop.astro";
+import TerminalIsland from "../components/terminal/TerminalIsland";
 import AidesBubble from "../components/AidesBubble.astro";
 import "../styles/global.css";
 
@@ -57,6 +59,10 @@ const { title, fullWidth = false } = Astro.props;
     }
 
     <BaseFooter />
+
+    <BackToTop />
+
+    <TerminalIsland client:load />
 
     {/*<AidesBubble />*/}
 

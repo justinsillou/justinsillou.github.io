@@ -9,7 +9,9 @@ export const changelog = [
             "Édition du footer [WIP]",
             "Modification de la page 404",
             "Préparation de la page projet + Lien avec la page CV",
-            "Réflexion sur l'i18n"
+            "Réflexion sur l'i18n",
+            "Ajout d'un terminal interactif",
+            "Ajout de commandes pour naviguer dans le site"
         ],
     },
     {

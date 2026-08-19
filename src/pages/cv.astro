@@ -1,195 +1,30 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-type ExperienceProject = {
-  name: string;
-  description: string;
-  tags?: string[];
-};
+import {
+  periods,
+  education,
+  skillGroups,
+  softSkillList,
+  languages,
+  interests,
+  additionalInfo,
+  skillList,
+} from "../data/cv";
 
-type Experience = {
-  role: string;
-  company: string;
-  contract: string;
-  period: string;
-  duration: string;
-  location: string;
-  note?: string;
-  tags?: string[];
-  softSkills?: string[];
-  projects?: ExperienceProject[];
-};
-
-type PeriodGroup = {
-  label: string;
-  items: Experience[];
-};
-
-type Education = {
-  degree: string;
-  school: string;
-  link?: string;
-};
-
-// Expériences professionnelles
-const periods: PeriodGroup[] = [
-  {
-    label: "2024 — Aujourd'hui",
-    items: [
-      {
-        role: "Développeur Back-end",
-        company: "Promatec",
-        contract: "CDI",
-        period: "sept. 2024 — aujourd'hui",
-        duration: "2 ans",
-        location: "Bondues, Hauts-de-France",
-
-        projects: [
-          {
-            name: "Promatec",
-            description:
-              "Développement et maintenance des outils internes et des solutions web pour les besoins de l'entreprise et de ses clients.",
-            tags: ["PHP", "SQL", "API", "JavaScript"],
-          },
-          {
-            name: "MailSecure",
-            description:
-              "Développement de la solution MailSecure, avec une forte implication sur le développement applicatif, le back-end, les API et l'environnement technique.",
-            tags: ["Next.js", "TypeScript", "React", "Docker", "API"],
-          },
-        ],
-
-        softSkills: [
-          "Travail en équipe",
-          "Autonomie",
-          "Résolution de problèmes",
-          "Adaptabilité",
-        ],
-      },
-    ],
-  },
-  {
-    label: "2022 — 2024",
-    items: [
-      {
-        role: "Développeur Back-end",
-        company: "Promatec",
-        contract: "Alternance",
-        period: "sept. 2022 — août 2024",
-        duration: "2 ans",
-        location: "Bondues, Hauts-de-France",
-        tags: ["PHP", "SQL", "Linux / Bash", "API"],
-        softSkills: [
-          "Travail en équipe",
-          "Autonomie",
-          "Organisation",
-        ],
-      },
-      {
-        role: "Développeur Full-stack",
-        company: "Local & Toi",
-        contract: "Projet étudiant",
-        period: "sept. 2023 — janv. 2024",
-        duration: "5 mois",
-        location: "Villeneuve-d'Ascq, Hauts-de-France",
-        note: "Projet Platine",
-        tags: ["Flutter", "Figma"],
-        softSkills: [
-          "Travail en équipe",
-          "Communication",
-          "Gestion de projet",
-        ],
-      },
-    ],
-  },
-  {
-    label: "2018 — 2022",
-    items: [
-      {
-        role: "Employé polyvalent",
-        company: "Stokomani",
-        contract: "Intérimaire",
-        period: "juil. 2022 — août 2022",
-        duration: "2 mois",
-        location: "Lys-lez-Lannoy, Hauts-de-France",
-        softSkills: [
-          "Relation client",
-          "Travail en équipe",
-          "Adaptabilité",
-          "Organisation",
-        ],
-      },
-      {
-        role: "Développeur Web",
-        company: "Auto-Entreprise Fabien Pamelard",
-        contract: "Stage",
-        period: "avr. 2021 — août 2021",
-        duration: "5 mois",
-        location: "Armentières, Hauts-de-France",
-        note: "Stage de fin de Licence",
-        tags: ["HTML", "CSS", "JavaScript", "PrestaShop"],
-        softSkills: [
-          "Autonomie",
-          "Communication",
-          "Organisation",
-        ],
-      },
-      {
-        role: "Auxiliaire de banque",
-        company: "Groupe Crédit du Nord",
-        contract: "CDD",
-        period: "août 2018",
-        duration: "1 mois",
-        location: "Lumbres, Hauts-de-France",
-        note:
-          "Expérience renouvelée en août 2019 au Crédit du Nord de Watten, ainsi que des missions d'intérim.",
-        softSkills: [
-          "Accueil client",
-          "Rigueur",
-          "Confidentialité",
-          "Organisation",
-        ],
-      },
-    ],
-  },
-];
-
-// Formation
-const education: Education[] = [
-  {
-    degree: "Master — STS, Parcours E-Services, Mention Informatique",
-    school: "Université de Lille",
-    link: "https://diplome-certificat.univ-lille.fr/index.html?key=D12824758A4F95CAC319D56AFFFD13ED9E29127428FF06E484826448207792D2YXlkMXltWTRCd1J2QXRXMTE1SkFUQzRmWnBTbVFBYjRnNGtQa2Z1UCtJRDl6elBI",
-  },
-  {
-    degree: "Licence — STS, Parcours Informatique",
-    school: "Université de Lille",
-    link: "https://diplome-certificat.univ-lille.fr/index.html?key=8F449EDDB7A37213CE6EA7553DEFEB993E65F275F47CE06702A419391B056694MkVWYW9uMlFDUHlvY0pTaE9vVkNMcWhBZUkxeTlQSEZqeGJHQXY0RDk0UmlrZzdx",
-  },
-];
-
-// Liste automatique des compétences techniques
-const skillList = [
-  ...new Set(
-    periods.flatMap((group) =>
-      group.items.flatMap((experience) => [
-        ...(experience.tags ?? []),
-        ...(experience.projects?.flatMap(
-          (project) => project.tags ?? [],
-        ) ?? []),
-      ]),
-    ),
-  ),
-].sort();
-
-// Mélange aléatoire
+/**
+ * Mélange aléatoire
+ */
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
 
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
 
-    [result[i], result[j]] = [result[j], result[i]];
+    [result[i], result[j]] = [
+      result[j],
+      result[i],
+    ];
   }
 
   return result;
@@ -222,54 +57,12 @@ function getSkillColor(skill: string): string {
     "hsl(0 0% 50%)"
   );
 }
-
-// Liste automatique des compétences transversales
-const softSkillList = [
-  ...new Set(
-    periods.flatMap((group) =>
-      group.items.flatMap(
-        (experience) => experience.softSkills ?? [],
-      ),
-    ),
-  ),
-].sort();
-
-// Centres d'intérêt
-const interests = [
-  {
-    title: "Musique",
-    description:
-      "Tubiste au sein de l'Harmonie d'Aire-sur-la-Lys depuis septembre 2010. Batterie et guitare en autodidacte.",
-  },
-  {
-    title: "Sport",
-    description:
-      "Course à pied, Randonnée, Escalade, Fléchettes",
-  },
-  {
-    title: "Loisirs",
-    description:
-      "Échecs, Jeux de société, Lecture",
-  },
-];
-
-// Informations complémentaires
-const additionalInfo = [
-  {
-    title: "Permis",
-    description: "Permis B et A2",
-  },
-  {
-    title: "Mobilité",
-    description: "Véhiculé",
-  },
-];
 ---
 
 <BaseLayout title="CV — Justin Sillou" fullWidth>
   <div
-    class="cv-page w-full px-5 sm:px-8 lg:px-16 py-14 sm:py-20 lg:py-28"
-  >
+  class="cv-page w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-14 sm:py-20 lg:py-28"
+>
 
     <!-- En-tête -->
     <header class="mb-14 sm:mb-16 lg:mb-24 max-w-3xl">
@@ -299,7 +92,7 @@ const additionalInfo = [
         <section>
 
           <h2
-            class="cv-section-title text-xs sm:text-sm uppercase  text-neutral-400 dark:text-neutral-500 mb-10"
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-10"
           >
             Expérience
           </h2>
@@ -328,7 +121,7 @@ const additionalInfo = [
 
                     <!-- Date mobile -->
                     <h3
-                      class="lg:hidden cv-section-title text-xs uppercase  text-neutral-400 dark:text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-6"
+                      class="lg:hidden cv-section-title text-xs uppercase text-neutral-400 dark:text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-6"
                     >
                       {group.label}
                     </h3>
@@ -411,7 +204,7 @@ const additionalInfo = [
                                           {project.name ===
                                             "MailSecure" && (
                                             <span
-                                              class="text-[10px] sm:text-xs cv-mono uppercase  text-neutral-400 dark:text-neutral-500"
+                                              class="text-[10px] sm:text-xs cv-mono uppercase text-neutral-400 dark:text-neutral-500"
                                             >
                                               Produit
                                             </span>
@@ -563,7 +356,7 @@ const additionalInfo = [
         <section>
 
           <h2
-            class="cv-section-title text-xs sm:text-sm uppercase  text-neutral-400 dark:text-neutral-500 mb-10"
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-10"
           >
             Formation
           </h2>
@@ -623,49 +416,49 @@ const additionalInfo = [
         <section>
 
           <h2
-            class="cv-section-title text-xs sm:text-sm uppercase  text-neutral-400 dark:text-neutral-500 mb-5"
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-6"
           >
             Stack
           </h2>
 
-          <ul
-            class="flex flex-wrap gap-x-4 gap-y-3 lg:flex-col lg:gap-3"
-          >
+          <div class="space-y-6">
 
             {
-              skillList.map((skill) => {
-                const color = getSkillColor(skill);
+              skillGroups.map((group) => (
+                <div>
 
-                return (
-                  <li
-                    class="inline-flex items-center gap-2 whitespace-nowrap"
+                  <h3
+                    class="cv-mono text-[10px] sm:text-xs uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-3"
+                  >
+                    {group.title}
+                  </h3>
+
+                  <ul
+                    class="flex flex-wrap gap-x-4 gap-y-3 lg:flex-col lg:gap-3"
                   >
 
-                    <span
-                      class="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={`background-color: ${color}`}
-                    />
+                    {group.skills.map((skill) => (
+                      <li
+                        class="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 whitespace-nowrap"
+                      >
+                        {skill}
+                      </li>
+                    ))}
 
-                    <span
-                      class="text-xs sm:text-sm"
-                      style={`color: ${color}`}
-                    >
-                      {skill}
-                    </span>
+                  </ul>
 
-                  </li>
-                );
-              })
+                </div>
+              ))
             }
 
-          </ul>
+          </div>
         </section>
 
         <!-- Compétences transversales -->
         <section>
 
           <h2
-            class="cv-section-title text-xs sm:text-sm uppercase  text-neutral-400 dark:text-neutral-500 mb-5"
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
           >
             Compétences transversales
           </h2>
@@ -697,11 +490,47 @@ const additionalInfo = [
           </ul>
         </section>
 
+        <!-- Langues -->
+        <section>
+
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+          >
+            Langues
+          </h2>
+
+          <div class="space-y-3">
+
+            {
+              languages.map((language) => (
+                <div
+                  class="flex items-baseline justify-between gap-4"
+                >
+
+                  <span
+                    class="text-sm text-neutral-900 dark:text-neutral-100"
+                  >
+                    {language.name}
+                  </span>
+
+                  <span
+                    class="cv-mono text-xs text-neutral-400 dark:text-neutral-500 text-right"
+                  >
+                    {language.level}
+                  </span>
+
+                </div>
+              ))
+            }
+
+          </div>
+        </section>
+
         <!-- Centres d'intérêt -->
         <section>
 
           <h2
-            class="cv-section-title text-xs sm:text-sm uppercase  text-neutral-400 dark:text-neutral-500 mb-5"
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
           >
             Centres d'intérêt
           </h2>
@@ -735,7 +564,7 @@ const additionalInfo = [
         <section>
 
           <h2
-            class="cv-section-title text-xs sm:text-sm uppercase  text-neutral-400 dark:text-neutral-500 mb-5"
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
           >
             Informations complémentaires
           </h2>
