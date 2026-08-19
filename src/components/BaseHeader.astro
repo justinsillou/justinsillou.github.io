@@ -1,0 +1,225 @@
+---
+const pathname = Astro.url.pathname;
+
+const showBackButton = pathname !== "/" && pathname !== "/404";
+
+const menuItems = [
+  { label: "CV", href: "/cv" },
+  { label: "Projets", href: "/projets" },
+  { label: "Blog", href: "/blog" },
+  { label: "Now", href: "/now" },
+];
+---
+
+<header>
+  <!-- Retour -->
+  {
+    showBackButton && (
+      <a
+        href="/"
+        aria-label="Retour à l'accueil"
+        class="fixed top-4 left-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+      >
+        <svg
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+      </a>
+    )
+  }
+
+  <!-- Boutons -->
+  <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
+    <!-- Menu -->
+    <button
+      id="menu-toggle"
+      type="button"
+      aria-label="Ouvrir le menu"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+    >
+      <!-- Menu -->
+      <svg
+        id="menu-icon"
+        class="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M4 7h16"></path>
+        <path d="M4 12h16"></path>
+        <path d="M4 17h16"></path>
+      </svg>
+
+      <!-- Fermer -->
+      <svg
+        id="close-icon"
+        class="hidden w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M6 6l12 12"></path>
+        <path d="M18 6l-12 12"></path>
+      </svg>
+    </button>
+
+    <!-- Light / Dark -->
+    <button
+      id="theme-toggle"
+      type="button"
+      aria-label="Changer de thème"
+      class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+    >
+      <!-- Lune -->
+      <svg
+        class="w-4 h-4 dark:hidden"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+
+      <!-- Soleil -->
+      <svg
+        class="w-4 h-4 hidden dark:block"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="5"></circle>
+        <path
+          d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+        ></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Menu flottant -->
+  <nav
+    id="site-menu"
+    aria-label="Navigation principale"
+    aria-hidden="true"
+    class="fixed top-16 right-4 z-40 w-48 origin-top-right opacity-0 scale-95 pointer-events-none transition-all duration-150"
+  >
+    <div
+      class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl shadow-lg p-2"
+    >
+      <div class="space-y-1">
+        {
+          menuItems.map((item) => (
+            <a
+              href={item.href}
+              class="block px-3 py-2 rounded-xl text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </div>
+
+      {/*
+      <div class="my-2 border-t border-neutral-200 dark:border-neutral-800"></div>
+
+      <div class="space-y-1">
+        <a
+          href="https://github.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block px-3 py-2 rounded-xl text-sm text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+        >
+          GitHub
+        </a>
+
+        <a
+          href="https://www.linkedin.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block px-3 py-2 rounded-xl text-sm text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+        >
+          LinkedIn
+        </a>
+      </div>*/}
+    </div>
+  </nav>
+</header>
+
+<script>
+  const menuToggle = document.getElementById("menu-toggle");
+  const siteMenu = document.getElementById("site-menu");
+  const menuIcon = document.getElementById("menu-icon");
+  const closeIcon = document.getElementById("close-icon");
+
+  let menuOpen = false;
+
+  const setMenuState = (open: boolean) => {
+    menuOpen = open;
+
+    menuToggle?.setAttribute("aria-expanded", String(open));
+    menuToggle?.setAttribute(
+      "aria-label",
+      open ? "Fermer le menu" : "Ouvrir le menu"
+    );
+
+    siteMenu?.setAttribute("aria-hidden", String(!open));
+
+    siteMenu?.classList.toggle("opacity-0", !open);
+    siteMenu?.classList.toggle("scale-95", !open);
+    siteMenu?.classList.toggle("pointer-events-none", !open);
+
+    siteMenu?.classList.toggle("opacity-100", open);
+    siteMenu?.classList.toggle("scale-100", open);
+
+    menuIcon?.classList.toggle("hidden", open);
+    closeIcon?.classList.toggle("hidden", !open);
+  };
+
+  menuToggle?.addEventListener("click", () => {
+    setMenuState(!menuOpen);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!menuOpen) return;
+
+    const target = event.target as Node;
+
+    if (
+      !siteMenu?.contains(target) &&
+      !menuToggle?.contains(target)
+    ) {
+      setMenuState(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      setMenuState(false);
+    }
+  });
+
+  siteMenu?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      setMenuState(false);
+    });
+  });
+</script>
