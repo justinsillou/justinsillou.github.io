@@ -1,0 +1,62 @@
+---
+import ReadingSizeToggle from "./ReadingSizeToggle.astro";
+---
+
+<button
+    id="aides-toggle"
+    type="button"
+    aria-label="Ouvrir les options d'affichage"
+    aria-expanded="false"
+    aria-controls="aides-panel"
+    class="fixed bottom-4 right-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-xs text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+>
+    Aa
+</button>
+
+<div
+    id="aides-panel"
+    aria-hidden="true"
+    class="fixed bottom-16 right-4 z-40 w-56 origin-bottom-right opacity-0 scale-95 pointer-events-none transition-all duration-150"
+>
+    <div
+        class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl shadow-lg p-4 space-y-3"
+    >
+        <p
+            class="text-xs uppercase text-neutral-400 dark:text-neutral-500"
+        >
+            Affichage
+        </p>
+        <ReadingSizeToggle />
+        <!-- futures options ici -->
+    </div>
+</div>
+
+<script>
+    const toggle = document.getElementById("aides-toggle");
+    const panel = document.getElementById("aides-panel");
+    let open = false;
+
+    const setState = (next: boolean) => {
+        open = next;
+        toggle?.setAttribute("aria-expanded", String(next));
+        panel?.setAttribute("aria-hidden", String(!next));
+        panel?.classList.toggle("opacity-0", !next);
+        panel?.classList.toggle("scale-95", !next);
+        panel?.classList.toggle("pointer-events-none", !next);
+        panel?.classList.toggle("opacity-100", next);
+        panel?.classList.toggle("scale-100", next);
+    };
+
+    toggle?.addEventListener("click", () => setState(!open));
+
+    document.addEventListener("click", (e) => {
+        if (!open) return;
+        const target = e.target as Node;
+        if (!panel?.contains(target) && !toggle?.contains(target))
+            setState(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setState(false);
+    });
+</script>

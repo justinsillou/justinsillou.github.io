@@ -1,11 +1,13 @@
 ---
 import { changelog } from "../content/changelog";
+//import ReadingSizeToggle from "./ReadingSizeToggle.astro";
+//import EcoBadge from "./EcoBadge.astro";
 
 const latest = changelog[0];
 ---
 
 <footer
-  class="shrink-0 max-w-md mx-auto mb-8 text-center text-xs text-neutral-400"
+  class="shrink-0 max-w-md mx-auto mb-8 flex flex-col items-center gap-4 text-center text-xs text-neutral-400"
 >
   <a
     href="/changelog"
@@ -13,4 +15,9 @@ const latest = changelog[0];
   >
     Dernière mise à jour : {latest.date} — v{latest.version}
   </a>
+
+  <div class="flex flex-wrap items-center justify-center gap-4">
+    {/* <ReadingSizeToggle /> */}
+    {/* <EcoBadge /> */}
+  </div>
 </footer>

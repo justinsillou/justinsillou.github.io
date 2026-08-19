@@ -2,7 +2,10 @@
 import BaseHeader from "../components/BaseHeader.astro";
 import BaseFooter from "../components/BaseFooter.astro";
 import BarryAllen from "../components/BarryAllen.astro";
+import AidesBubble from "../components/AidesBubble.astro";
 import "../styles/global.css";
+
+const { title, fullWidth = false } = Astro.props;
 ---
 
 <html lang="fr" class="scroll-smooth">
@@ -10,7 +13,7 @@ import "../styles/global.css";
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Justin Sillou</title>
+    <title>{title ?? "Justin Sillou"}</title>
 
     <meta
       name="description"
@@ -27,6 +30,10 @@ import "../styles/global.css";
           : "light");
 
       document.documentElement.classList.toggle("dark", theme === "dark");
+
+      const fontSizes = { sm: "15px", md: "16px", lg: "18px" };
+      const fontSize = localStorage.getItem("fontSize") ?? "md";
+      document.documentElement.style.fontSize = fontSizes[fontSize] ?? fontSizes.md;
     </script>
   </head>
 
@@ -35,13 +42,23 @@ import "../styles/global.css";
   >
     <BaseHeader />
 
-    <main class="flex-1 flex items-center justify-center">
-      <div class="w-full max-w-md px-6">
-        <slot />
-      </div>
-    </main>
+    {
+      fullWidth ? (
+        <main class="flex-1">
+          <slot />
+        </main>
+      ) : (
+        <main class="flex-1 flex items-center justify-center">
+          <div class="w-full max-w-md px-6">
+            <slot />
+          </div>
+        </main>
+      )
+    }
 
     <BaseFooter />
+
+    {/*<AidesBubble />*/}
 
     <BarryAllen />
 
