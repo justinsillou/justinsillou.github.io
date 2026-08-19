@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <div class="max-w-md mx-auto mt-24 text-center">
+    <div id="step-0" class="block">
+      <h1 class="text-2xl font-bold mb-4">Perdu ?</h1>
+    <div class="flex gap-3 justify-center">
+      <button data-next="oui" class="px-5 py-2 border rounded-lg hover:opacity-70">OUI</button>
+      <button data-next="non" class="px-5 py-2 border rounded-lg hover:opacity-70">NON</button>
+    </div>
+  </div>
+
+  <div id="step-oui" class="hidden">
+    <p class="mb-4">Sage décision.</p>
+    <a href="/" class="px-5 py-2 border rounded-lg inline-block hover:opacity-70">Retour à l'accueil</a>
+  </div>
+
+  <div id="step-non" class="hidden">
+    <p class="mb-4">Tu ne trouveras rien ici. C'est une 404.</p>
+    <a href="/" class="px-5 py-2 border rounded-lg inline-block hover:opacity-70">Retour à l'accueil</a>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('button[data-next]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.getElementById('step-0')!.classList.add('hidden');
+      document.getElementById(`step-${btn.dataset.next}`)!.classList.remove('hidden');
+    });
+  });
+</script>
+</BaseLayout>

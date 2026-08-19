@@ -1,0 +1,16 @@
+---
+import { changelog } from "../content/changelog";
+
+const latest = changelog[0];
+---
+
+<footer
+  class="shrink-0 max-w-md mx-auto mb-8 text-center text-xs text-neutral-400"
+>
+  <a
+    href="/changelog"
+    class="hover:text-neutral-900 dark:hover:text-neutral-100 hover:underline"
+  >
+    Dernière mise à jour : {latest.date} — v{latest.version}
+  </a>
+</footer>
