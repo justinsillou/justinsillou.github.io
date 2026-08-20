@@ -7,14 +7,16 @@
   >
     <div class="flex items-center gap-1.5">
       {
-        ["↑", "↑", "↓", "↓", "←", "→", "←", "→", "B", "A"].map((key, index) => (
-          <span
-            data-konami-key={index}
-            class="w-5 h-5 flex items-center justify-center rounded text-[10px] text-neutral-300 dark:text-neutral-700 transition-all duration-200"
-          >
-            {key}
-          </span>
-        ))
+        ["↑", "↑", "↓", "↓", "←", "→", "←", "→", "B", "A"].map(
+          (key, index) => (
+            <span
+              data-konami-key={index}
+              class="w-5 h-5 flex items-center justify-center rounded text-[10px] text-neutral-300 dark:text-neutral-700 transition-all duration-200"
+            >
+              {key}
+            </span>
+          ),
+        )
       }
     </div>
   </div>
@@ -57,7 +59,8 @@
         title="Easter egg"
         tabindex="-1"
         allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen></iframe>
+        allowfullscreen
+      ></iframe>
     </div>
   </div>
 </div>
@@ -76,50 +79,108 @@
     "a",
   ];
 
-  const progress = document.getElementById("konami-progress");
-  const keys = document.querySelectorAll("[data-konami-key]");
+  const progress =
+    document.getElementById("konami-progress");
 
-  const modal = document.getElementById("konami-modal");
-  const video = document.getElementById("konami-video");
-  const closeButton = document.getElementById("konami-close");
+  const keys =
+    document.querySelectorAll(
+      "[data-konami-key]",
+    );
+
+  const modal =
+    document.getElementById("konami-modal");
+
+  const video =
+    document.getElementById("konami-video");
+
+  const closeButton =
+    document.getElementById("konami-close");
 
   let index = 0;
-  let hideTimeout: ReturnType<typeof setTimeout>;
+  let hideTimeout: ReturnType<typeof setTimeout> | undefined;
 
   /**
-   * Met à jour l'indicateur de progression
+   * Vérifie si le terminal est actuellement ouvert.
+   *
+   * Le TerminalIsland ajoute :
+   *
+   * document.documentElement.dataset.terminalOpen = "true"
+   *
+   * uniquement lorsque le terminal est visible.
+   */
+  const isTerminalOpen = () => {
+    return (
+      document.documentElement.dataset
+        .terminalOpen === "true"
+    );
+  };
+
+  /**
+   * Met à jour l'indicateur de progression.
    */
   const updateProgress = () => {
     keys.forEach((key, keyIndex) => {
       const active = keyIndex < index;
-      const current = keyIndex === index - 1;
+      const current =
+        keyIndex === index - 1;
 
-      key.classList.toggle("text-neutral-900", active);
-      key.classList.toggle("dark:text-neutral-100", active);
+      key.classList.toggle(
+        "text-neutral-900",
+        active,
+      );
 
-      key.classList.toggle("text-neutral-300", !active);
-      key.classList.toggle("dark:text-neutral-700", !active);
+      key.classList.toggle(
+        "dark:text-neutral-100",
+        active,
+      );
 
-      key.classList.toggle("scale-110", current);
+      key.classList.toggle(
+        "text-neutral-300",
+        !active,
+      );
+
+      key.classList.toggle(
+        "dark:text-neutral-700",
+        !active,
+      );
+
+      key.classList.toggle(
+        "scale-110",
+        current,
+      );
     });
 
     if (index > 0) {
-      progress?.classList.remove("opacity-0", "translate-y-2");
-      progress?.classList.add("opacity-100", "translate-y-0");
+      progress?.classList.remove(
+        "opacity-0",
+        "translate-y-2",
+      );
+
+      progress?.classList.add(
+        "opacity-100",
+        "translate-y-0",
+      );
 
       clearTimeout(hideTimeout);
 
       hideTimeout = setTimeout(() => {
         if (index === 0) {
-          progress?.classList.add("opacity-0", "translate-y-2");
-          progress?.classList.remove("opacity-100", "translate-y-0");
+          progress?.classList.add(
+            "opacity-0",
+            "translate-y-2",
+          );
+
+          progress?.classList.remove(
+            "opacity-100",
+            "translate-y-0",
+          );
         }
       }, 2000);
     }
   };
 
   /**
-   * Réinitialise la progression
+   * Réinitialise la progression.
    */
   const resetProgress = () => {
     index = 0;
@@ -131,126 +192,219 @@
         "scale-110",
       );
 
-      key.classList.add("text-neutral-300", "dark:text-neutral-700");
+      key.classList.add(
+        "text-neutral-300",
+        "dark:text-neutral-700",
+      );
     });
 
     clearTimeout(hideTimeout);
 
-    progress?.classList.add("opacity-0", "translate-y-2");
-    progress?.classList.remove("opacity-100", "translate-y-0");
+    progress?.classList.add(
+      "opacity-0",
+      "translate-y-2",
+    );
+
+    progress?.classList.remove(
+      "opacity-100",
+      "translate-y-0",
+    );
   };
 
   /**
-   * Déplace le bouton de fermeture
+   * Déplace le bouton de fermeture.
    */
   const moveCloseButton = () => {
-    if (!closeButton) return;
+    if (!closeButton) {
+      return;
+    }
 
     const padding = 20;
 
-    const buttonWidth = closeButton.offsetWidth;
-    const buttonHeight = closeButton.offsetHeight;
+    const buttonWidth =
+      closeButton.offsetWidth;
 
-    const maxX = window.innerWidth - buttonWidth - padding;
-    const maxY = window.innerHeight - buttonHeight - padding;
+    const buttonHeight =
+      closeButton.offsetHeight;
 
-    const x = padding + Math.random() * Math.max(0, maxX - padding);
+    const maxX =
+      window.innerWidth -
+      buttonWidth -
+      padding;
 
-    const y = padding + Math.random() * Math.max(0, maxY - padding);
+    const maxY =
+      window.innerHeight -
+      buttonHeight -
+      padding;
 
-    closeButton.style.position = "fixed";
-    closeButton.style.left = `${x}px`;
-    closeButton.style.top = `${y}px`;
-    closeButton.style.right = "auto";
+    const x =
+      padding +
+      Math.random() *
+        Math.max(0, maxX - padding);
+
+    const y =
+      padding +
+      Math.random() *
+        Math.max(0, maxY - padding);
+
+    closeButton.style.position =
+      "fixed";
+
+    closeButton.style.left =
+      `${x}px`;
+
+    closeButton.style.top =
+      `${y}px`;
+
+    closeButton.style.right =
+      "auto";
   };
 
   /**
-   * Ouvre le Rickroll
+   * Ouvre le Rickroll.
    */
   const openKonami = () => {
-    if (!modal || !video) return;
+    if (!modal || !video) {
+      return;
+    }
 
     video.setAttribute(
       "src",
       "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0",
     );
 
-    closeButton?.removeAttribute("style");
+    closeButton?.removeAttribute(
+      "style",
+    );
 
-    closeButton?.style.setProperty("top", "20px");
-    closeButton?.style.setProperty("right", "20px");
+    closeButton?.style.setProperty(
+      "top",
+      "20px",
+    );
+
+    closeButton?.style.setProperty(
+      "right",
+      "20px",
+    );
 
     modal.classList.remove("hidden");
     modal.classList.add("flex");
 
     resetProgress();
   };
+
   /**
-   * Ferme le Rickroll
+   * Ferme le Rickroll.
    */
   const closeKonami = () => {
-    if (!modal || !video) return;
+    if (!modal || !video) {
+      return;
+    }
 
     modal.classList.add("hidden");
     modal.classList.remove("flex");
 
     video.setAttribute("src", "");
 
-    // Remet le bouton à sa position originale
-    closeButton?.removeAttribute("style");
+    closeButton?.removeAttribute(
+      "style",
+    );
 
     resetProgress();
   };
 
   /**
-   * Détection du Konami Code
+   * Lorsque le terminal devient visible,
+   * on annule immédiatement toute progression.
    */
-  document.addEventListener("keydown", (event) => {
-    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-
-    if (key === konamiCode[index]) {
-      index++;
-
-      updateProgress();
-
-      if (index === konamiCode.length) {
-        openKonami();
-      }
-
-      return;
-    }
-
-    resetProgress();
-
-    // Permet de recommencer directement avec la première touche
-    if (key === konamiCode[0]) {
-      index = 1;
-      updateProgress();
-    }
-  });
+  document.addEventListener(
+    "terminal-open",
+    () => {
+      resetProgress();
+    },
+  );
 
   /**
-   * Le bouton fuit lorsqu'on l'approche
+   * Détection du Konami Code.
    */
-  closeButton?.addEventListener("mouseenter", moveCloseButton);
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      /*
+       * Le terminal est prioritaire.
+       *
+       * Toutes les touches sont ignorées
+       * par le Konami Code lorsqu'il est ouvert.
+       */
+      if (isTerminalOpen()) {
+        resetProgress();
+        return;
+      }
+
+      const key =
+        event.key.length === 1
+          ? event.key.toLowerCase()
+          : event.key;
+
+      if (key === konamiCode[index]) {
+        index++;
+
+        updateProgress();
+
+        if (
+          index ===
+          konamiCode.length
+        ) {
+          openKonami();
+        }
+
+        return;
+      }
+
+      resetProgress();
+
+      /*
+       * Permet de recommencer directement
+       * avec la première touche.
+       */
+      if (key === konamiCode[0]) {
+        index = 1;
+        updateProgress();
+      }
+    },
+  );
+
+  /**
+   * Le bouton fuit lorsqu'on l'approche.
+   */
+  closeButton?.addEventListener(
+    "mouseenter",
+    moveCloseButton,
+  );
 
   /**
    * Si on arrive malgré tout à cliquer dessus,
    * il fuit à nouveau.
    */
-  closeButton?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  closeButton?.addEventListener(
+    "click",
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    moveCloseButton();
-  });
+      moveCloseButton();
+    },
+  );
 
   /**
-   * Escape = seul moyen de fermer
+   * Escape = seul moyen de fermer le Rickroll.
    */
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeKonami();
-    }
-  });
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key === "Escape") {
+        closeKonami();
+      }
+    },
+  );
 </script>

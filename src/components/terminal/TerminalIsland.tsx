@@ -12,6 +12,7 @@ import {
 } from "../../data/cv";
 
 import TerminalOutput from "./TerminalOutput";
+import { tryEasterEgg } from "./EasterEggs";
 
 type OutputType =
   | "default"
@@ -39,8 +40,10 @@ const COMMANDS = [
 
 export default function TerminalIsland() {
   const [isOpen, setIsOpen] = useState(false);
+
   const [isMinimized, setIsMinimized] =
     useState(false);
+
   const [isMaximized, setIsMaximized] =
     useState(false);
 
@@ -56,6 +59,9 @@ export default function TerminalIsland() {
   const [historyIndex, setHistoryIndex] =
     useState(-1);
 
+  const [crashed, setCrashed] =
+    useState(false);
+
   const inputRef =
     useRef<HTMLInputElement>(null);
 
@@ -63,6 +69,33 @@ export default function TerminalIsland() {
     useRef<HTMLDivElement>(null);
 
   const historyId = useRef(0);
+
+  /* ---------------------------------------------------------------- */
+  /*  Synchronisation état terminal / DOM                            */
+  /* ---------------------------------------------------------------- */
+
+  useEffect(() => {
+    const terminalIsVisible =
+      isOpen && !isMinimized;
+
+    document.documentElement.dataset.terminalOpen =
+      String(terminalIsVisible);
+
+    if (terminalIsVisible) {
+      document.dispatchEvent(
+        new CustomEvent("terminal-open"),
+      );
+    }
+
+    return () => {
+      document.documentElement.dataset.terminalOpen =
+        "false";
+    };
+  }, [isOpen, isMinimized]);
+
+  /* ---------------------------------------------------------------- */
+  /*  Terminal controls                                               */
+  /* ---------------------------------------------------------------- */
 
   function openTerminal() {
     setIsOpen(true);
@@ -86,9 +119,16 @@ export default function TerminalIsland() {
   }
 
   function toggleMaximize() {
-    setIsMaximized((current) => !current);
+    setIsMaximized(
+      (current) => !current,
+    );
+
     setIsMinimized(false);
   }
+
+  /* ---------------------------------------------------------------- */
+  /*  History                                                         */
+  /* ---------------------------------------------------------------- */
 
   function addHistory(
     content: React.ReactNode,
@@ -110,6 +150,10 @@ export default function TerminalIsland() {
     setHistory([]);
   }
 
+  /* ---------------------------------------------------------------- */
+  /*  Commands                                                        */
+  /* ---------------------------------------------------------------- */
+
   function executeCommand(
     rawCommand: string,
   ) {
@@ -119,7 +163,8 @@ export default function TerminalIsland() {
       return;
     }
 
-    const normalized = value.toLowerCase();
+    const normalized =
+      value.toLowerCase();
 
     setCommandHistory((current) => [
       ...current.filter(
@@ -132,13 +177,47 @@ export default function TerminalIsland() {
 
     addHistory(
       <span>
-        <span className="text-neutral-400">
+        <span className="text-neutral-400 dark:text-neutral-500">
           $
         </span>{" "}
-        {value}
+        <span className="text-neutral-900 dark:text-neutral-100">
+          {value}
+        </span>
       </span>,
       "command",
     );
+
+    /* ------------------------------------------------------------ */
+    /* Easter eggs                                                  */
+    /* ------------------------------------------------------------ */
+
+    const easterEggEntries =
+      tryEasterEgg(normalized);
+
+    if (easterEggEntries) {
+      easterEggEntries.forEach(
+        (entry) => {
+          addHistory(
+            entry.content,
+            entry.type,
+          );
+
+          if (
+            entry.action === "crash"
+          ) {
+            window.setTimeout(() => {
+              setCrashed(true);
+            }, 900);
+          }
+        },
+      );
+
+      return;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Standard commands                                            */
+    /* ------------------------------------------------------------ */
 
     switch (normalized) {
       case "help":
@@ -230,7 +309,9 @@ export default function TerminalIsland() {
                                   }
                                 >
                                   <p className="text-neutral-700 dark:text-neutral-300">
-                                    {project.name}
+                                    {
+                                      project.name
+                                    }
                                   </p>
 
                                   <p className="text-neutral-400 dark:text-neutral-500">
@@ -345,7 +426,7 @@ export default function TerminalIsland() {
       default:
         addHistory(
           <div>
-            <p>
+            <p className="text-neutral-700 dark:text-neutral-300">
               Command not found:{" "}
               <span className="text-neutral-900 dark:text-neutral-100">
                 {value}
@@ -362,6 +443,10 @@ export default function TerminalIsland() {
     }
   }
 
+  /* ---------------------------------------------------------------- */
+  /*  Submit                                                          */
+  /* ---------------------------------------------------------------- */
+
   function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
   ) {
@@ -370,6 +455,10 @@ export default function TerminalIsland() {
     executeCommand(command);
     setCommand("");
   }
+
+  /* ---------------------------------------------------------------- */
+  /*  Keyboard                                                        */
+  /* ---------------------------------------------------------------- */
 
   function handleInputKeyDown(
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -390,9 +479,12 @@ export default function TerminalIsland() {
             );
 
       setHistoryIndex(nextIndex);
+
       setCommand(
         commandHistory[nextIndex] ?? "",
       );
+
+      return;
     }
 
     if (event.key === "ArrowDown") {
@@ -415,9 +507,12 @@ export default function TerminalIsland() {
       }
 
       setHistoryIndex(nextIndex);
+
       setCommand(
         commandHistory[nextIndex] ?? "",
       );
+
+      return;
     }
 
     if (
@@ -426,6 +521,7 @@ export default function TerminalIsland() {
     ) {
       event.preventDefault();
       clearTerminal();
+      return;
     }
 
     if (event.key === "Tab") {
@@ -449,14 +545,19 @@ export default function TerminalIsland() {
     }
   }
 
+  /* ---------------------------------------------------------------- */
+  /*  Focus                                                           */
+  /* ---------------------------------------------------------------- */
+
   useEffect(() => {
     if (!isOpen || isMinimized) {
       return;
     }
 
-    const timeout = window.setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
+    const timeout =
+      window.setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
 
     function handleKeyDown(
       event: KeyboardEvent,
@@ -481,6 +582,10 @@ export default function TerminalIsland() {
     };
   }, [isOpen, isMinimized]);
 
+  /* ---------------------------------------------------------------- */
+  /*  Scroll                                                          */
+  /* ---------------------------------------------------------------- */
+
   useEffect(() => {
     if (!outputRef.current) {
       return;
@@ -490,239 +595,305 @@ export default function TerminalIsland() {
       outputRef.current.scrollHeight;
   }, [history]);
 
-  /*
-   * Mobile :
-   * on ne rend absolument rien sous md.
-   */
+  /* ---------------------------------------------------------------- */
+  /*  Render                                                          */
+  /* ---------------------------------------------------------------- */
+
   return (
-    <div className="hidden md:block">
-      {!isOpen && (
-        <button
-          type="button"
-          onClick={openTerminal}
-          aria-label="Ouvrir le terminal"
-          className="
-            fixed
-            bottom-5
-            left-5
-            z-40
-            w-8
-            h-8
-            flex
-            items-center
-            justify-center
-            cv-mono
-            text-sm
-            text-neutral-300
-            dark:text-neutral-700
-            hover:text-neutral-600
-            dark:hover:text-neutral-400
-            transition-colors
-            select-none
-          "
+    <>
+      {/* ------------------------------------------------------------ */}
+      {/* Internal Server Error                                       */}
+      {/* ------------------------------------------------------------ */}
+
+      {crashed && (
+        <div
+            className="fixed inset-0 z-[9999] bg-white text-black"
         >
-          $
-        </button>
-      )}
+            <div className="p-8">
+            <h1
+                className="
+                text-[28px]
+                font-bold
+                leading-tight
+                mb-4
+                "
+            >
+                500 Internal Server Error
+            </h1>
 
-      {isOpen && isMinimized && (
-        <button
-          type="button"
-          onClick={restoreTerminal}
-          className="
-            fixed
-            bottom-0
-            left-5
-            z-50
-            flex
-            items-center
-            gap-3
-            h-9
-            px-4
-            rounded-t-md
-            border
-            border-neutral-300
-            dark:border-neutral-700
-            bg-white
-            dark:bg-neutral-950
-            shadow-lg
-            cv-mono
-            text-xs
-            text-neutral-600
-            dark:text-neutral-400
-            hover:text-neutral-900
-            dark:hover:text-neutral-100
-            transition-colors
-          "
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+            <p
+                className="
+                text-[16px]
+                leading-6
+                "
+            >
+                The server encountered an internal error
+                and was unable to complete your request.
+            </p>
 
-          terminal
+            <hr className="mt-6 border-0 border-t border-neutral-300" />
 
-          <span className="text-neutral-300 dark:text-neutral-700">
-            $
-          </span>
-        </button>
-      )}
+            <p className="mt-4 text-[12px] text-neutral-500">
+                nginx
+            </p>
+            </div>
+        </div>
+        )}
 
-      {isOpen && !isMinimized && (
-        <>
-          <div
+      {/* ------------------------------------------------------------ */}
+      {/* Desktop only                                                 */}
+      {/* ------------------------------------------------------------ */}
+
+      <div className="hidden md:block">
+        {/* Bouton d'ouverture */}
+
+        {!isOpen && (
+          <button
+            type="button"
+            onClick={openTerminal}
+            aria-label="Ouvrir le terminal"
             className="
               fixed
-              inset-0
+              bottom-5
+              left-5
               z-40
-              bg-neutral-950/10
-              dark:bg-black/30
-              backdrop-blur-[2px]
-            "
-            onClick={closeTerminal}
-          />
-
-          <section
-            className={`
-              fixed
-              z-50
-              overflow-hidden
+              w-8
+              h-8
               flex
-              flex-col
-              rounded-lg
+              items-center
+              justify-center
+              cv-mono
+              text-sm
+              text-neutral-300
+              dark:text-neutral-700
+              hover:text-neutral-600
+              dark:hover:text-neutral-400
+              transition-colors
+              select-none
+            "
+          >
+            $
+          </button>
+        )}
+
+        {/* ---------------------------------------------------------- */}
+        {/* Terminal minimisé                                          */}
+        {/* ---------------------------------------------------------- */}
+
+        {isOpen && isMinimized && (
+          <button
+            type="button"
+            onClick={restoreTerminal}
+            className="
+              fixed
+              bottom-0
+              left-5
+              z-50
+              flex
+              items-center
+              gap-3
+              h-9
+              px-4
+              rounded-t-md
               border
               border-neutral-300
               dark:border-neutral-700
               bg-white
               dark:bg-neutral-950
-              shadow-2xl
-
-              ${
-                isMaximized
-                  ? "left-[5vw] top-[5vh] w-[90vw] h-[90vh]"
-                  : "left-6 bottom-6 w-[760px] h-[70vh] max-h-[720px]"
-              }
-            `}
-            aria-label="Terminal"
+              shadow-lg
+              cv-mono
+              text-xs
+              text-neutral-600
+              dark:text-neutral-400
+              hover:text-neutral-900
+              dark:hover:text-neutral-100
+              transition-colors
+            "
           >
-            {/* Header */}
-            <header
+            <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+
+            terminal
+
+            <span className="text-neutral-300 dark:text-neutral-700">
+              $
+            </span>
+          </button>
+        )}
+
+        {/* ---------------------------------------------------------- */}
+        {/* Terminal ouvert                                             */}
+        {/* ---------------------------------------------------------- */}
+
+        {isOpen && !isMinimized && (
+          <>
+            {/* Overlay */}
+
+            <div
               className="
-                relative
-                shrink-0
-                h-11
-                flex
-                items-center
-                justify-between
-                px-4
-                border-b
-                border-neutral-200
-                dark:border-neutral-800
-                bg-neutral-50
-                dark:bg-neutral-900
+                fixed
+                inset-0
+                z-40
+                bg-neutral-950/10
+                dark:bg-black/30
+                backdrop-blur-[2px]
               "
+              onClick={closeTerminal}
+            />
+
+            {/* Fenêtre */}
+
+            <section
+              className={`
+                fixed
+                z-50
+                overflow-hidden
+                flex
+                flex-col
+                rounded-lg
+                border
+                border-neutral-300
+                dark:border-neutral-700
+                bg-white
+                dark:bg-neutral-950
+                shadow-2xl
+
+                ${
+                  isMaximized
+                    ? "left-[5vw] top-[5vh] w-[90vw] h-[90vh]"
+                    : "left-6 bottom-6 w-[760px] h-[70vh] max-h-[720px]"
+                }
+              `}
+              aria-label="Terminal"
             >
-              {/* Boutons macOS */}
+              {/* Header */}
+
+              <header
+                className="
+                  relative
+                  shrink-0
+                  h-11
+                  flex
+                  items-center
+                  justify-between
+                  px-4
+                  border-b
+                  border-neutral-200
+                  dark:border-neutral-800
+                  bg-neutral-50
+                  dark:bg-neutral-900
+                "
+              >
+                {/* Boutons macOS */}
+
                 <div className="flex items-center gap-2">
-                {/* Fermer */}
-                <button
+                  {/* Fermer */}
+
+                  <button
                     type="button"
                     onClick={closeTerminal}
                     aria-label="Fermer"
                     className="
-                    group
-                    w-3
-                    h-3
-                    rounded-full
-                    bg-[#ff5f57]
-                    flex
-                    items-center
-                    justify-center
-                    transition-transform
-                    hover:scale-110
+                      group
+                      w-3
+                      h-3
+                      rounded-full
+                      bg-[#ff5f57]
+                      flex
+                      items-center
+                      justify-center
+                      transition-transform
+                      hover:scale-110
                     "
-                >
+                  >
                     <span
-                    className="
+                      className="
                         opacity-0
                         group-hover:opacity-100
                         text-[8px]
                         leading-none
                         text-[#8a1c17]
                         font-semibold
-                    "
+                      "
                     >
-                    ×
+                      ×
                     </span>
-                </button>
+                  </button>
 
-                {/* Réduire */}
-                <button
+                  {/* Réduire */}
+
+                  <button
                     type="button"
                     onClick={minimizeTerminal}
                     aria-label="Réduire"
                     className="
-                    group
-                    w-3
-                    h-3
-                    rounded-full
-                    bg-[#febc2e]
-                    flex
-                    items-center
-                    justify-center
-                    transition-transform
-                    hover:scale-110
+                      group
+                      w-3
+                      h-3
+                      rounded-full
+                      bg-[#febc2e]
+                      flex
+                      items-center
+                      justify-center
+                      transition-transform
+                      hover:scale-110
                     "
-                >
+                  >
                     <span
-                    className="
+                      className="
                         opacity-0
                         group-hover:opacity-100
                         text-[7px]
                         leading-none
                         text-[#7a5200]
                         font-semibold
-                    "
+                      "
                     >
-                    −
+                      −
                     </span>
-                </button>
+                  </button>
 
-                {/* Agrandir */}
-                <button
+                  {/* Agrandir */}
+
+                  <button
                     type="button"
                     onClick={toggleMaximize}
                     aria-label={
-                    isMaximized
+                      isMaximized
                         ? "Restaurer"
                         : "Agrandir"
                     }
                     className="
-                    group
-                    w-3
-                    h-3
-                    rounded-full
-                    bg-[#28c840]
-                    flex
-                    items-center
-                    justify-center
-                    transition-transform
-                    hover:scale-110
+                      group
+                      w-3
+                      h-3
+                      rounded-full
+                      bg-[#28c840]
+                      flex
+                      items-center
+                      justify-center
+                      transition-transform
+                      hover:scale-110
                     "
-                >
+                  >
                     <span
-                    className="
+                      className="
                         opacity-0
                         group-hover:opacity-100
                         text-[7px]
                         leading-none
                         text-[#12631c]
                         font-semibold
-                    "
+                      "
                     >
-                    {isMaximized ? "<" : ">"}
+                      {isMaximized ? "<" : ">"}
                     </span>
-                </button>
-            </div>
-              <span
-                className="
+                  </button>
+                </div>
+
+                {/* Titre */}
+
+                <span
+                  className="
                     absolute
                     left-1/2
                     -translate-x-1/2
@@ -731,83 +902,94 @@ export default function TerminalIsland() {
                     text-neutral-400
                     dark:text-neutral-500
                     select-none
-                "
+                  "
                 >
-                terminal
+                  terminal
                 </span>
 
-              <button
-                type="button"
-                onClick={closeTerminal}
+                {/* Escape */}
+
+                <button
+                  type="button"
+                  onClick={closeTerminal}
+                  className="
+                    cv-mono
+                    text-xs
+                    text-neutral-400
+                    dark:text-neutral-500
+                    hover:text-neutral-900
+                    dark:hover:text-neutral-100
+                    transition-colors
+                  "
+                >
+                  esc
+                </button>
+              </header>
+
+              {/* ---------------------------------------------------- */}
+              {/* Contenu du terminal                                  */}
+              {/* ---------------------------------------------------- */}
+
+              <div
+                ref={outputRef}
+                onClick={() =>
+                  inputRef.current?.focus()
+                }
                 className="
+                  flex-1
+                  overflow-y-auto
+                  px-6
+                  py-6
+                  lg:px-8
+                  lg:py-7
                   cv-mono
                   text-xs
-                  text-neutral-400
-                  dark:text-neutral-500
-                  hover:text-neutral-900
-                  dark:hover:text-neutral-100
-                  transition-colors
+                  lg:text-sm
+                  leading-relaxed
+                  cursor-text
+                  text-neutral-700
+                  dark:text-neutral-300
                 "
               >
-                esc
-              </button>
-            </header>
+                {/* Welcome */}
 
-            {/* Terminal */}
-            <div
-              ref={outputRef}
-              onClick={() =>
-                inputRef.current?.focus()
-              }
-              className="
-                flex-1
-                overflow-y-auto
-                px-6
-                py-6
-                lg:px-8
-                lg:py-7
-                cv-mono
-                text-xs
-                lg:text-sm
-                leading-relaxed
-                cursor-text
-              "
-            >
-              <div className="text-neutral-400 dark:text-neutral-500 mb-6">
-                <p>
-                  Justin Sillou terminal
-                </p>
+                <div className="text-neutral-400 dark:text-neutral-500 mb-6">
+                  <p>
+                    Justin Sillou terminal
+                  </p>
 
-                <p>
-                  Type{" "}
-                  <span className="text-neutral-900 dark:text-neutral-100">
-                    help
-                  </span>{" "}
-                  to get started.
-                </p>
-              </div>
+                  <p>
+                    Type{" "}
+                    <span className="text-neutral-900 dark:text-neutral-100">
+                      help
+                    </span>{" "}
+                    to get started.
+                  </p>
+                </div>
 
-              <div className="space-y-4">
-                {history.map((entry) => (
-                  <TerminalOutput
-                    key={entry.id}
-                    type={entry.type}
-                  >
-                    {entry.content}
-                  </TerminalOutput>
-                ))}
-              </div>
+                {/* History */}
 
-              {/* Prompt */}
-              <form
-                onSubmit={handleSubmit}
-                className="flex items-center mt-6"
-              >
-                <span className="shrink-0 text-neutral-900 dark:text-neutral-100">
-                  $
-                </span>
+                <div className="space-y-4">
+                  {history.map((entry) => (
+                    <TerminalOutput
+                      key={entry.id}
+                      type={entry.type}
+                    >
+                      {entry.content}
+                    </TerminalOutput>
+                  ))}
+                </div>
 
-                <div className="relative flex-1 ml-2">
+                {/* Prompt */}
+
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex items-center mt-6"
+                >
+                  <span className="shrink-0 text-neutral-900 dark:text-neutral-100">
+                    $
+                  </span>
+
                   <input
                     ref={inputRef}
                     value={command}
@@ -824,39 +1006,25 @@ export default function TerminalIsland() {
                     autoCapitalize="off"
                     spellCheck={false}
                     className="
-                      w-full
+                      ml-2
+                      flex-1
+                      min-w-0
                       bg-transparent
                       border-none
                       outline-none
                       text-neutral-900
                       dark:text-neutral-100
-                      caret-transparent
+                      caret-neutral-900
+                      dark:caret-neutral-100
                     "
                     aria-label="Commande terminal"
                   />
-
-                  <span
-                    className="
-                      pointer-events-none
-                      absolute
-                      left-0
-                      top-0
-                      h-[1.25em]
-                      w-[7px]
-                      bg-neutral-900
-                      dark:bg-neutral-100
-                      animate-pulse
-                    "
-                    style={{
-                      transform: `translateX(${command.length * 0.6}em)`,
-                    }}
-                  />
-                </div>
-              </form>
-            </div>
-          </section>
-        </>
-      )}
-    </div>
+                </form>
+              </div>
+            </section>
+          </>
+        )}
+      </div>
+    </>
   );
 }
