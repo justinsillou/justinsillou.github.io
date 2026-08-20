@@ -1,0 +1,42 @@
+<button
+  id="back-to-top"
+  type="button"
+  aria-label="Retourner en haut de la page"
+  title="Retourner en haut"
+  class="fixed bottom-4 right-4 z-50 w-9 h-9 hidden items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-all duration-200"
+>
+  <svg
+    class="w-4 h-4"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m18 15-6-6-6 6"></path>
+  </svg>
+</button>
+
+<script>
+  const backToTop = document.getElementById("back-to-top");
+
+  const updateVisibility = () => {
+    const visible = window.scrollY > 400;
+
+    backToTop?.classList.toggle("hidden", !visible);
+    backToTop?.classList.toggle("flex", visible);
+  };
+
+  window.addEventListener("scroll", updateVisibility, { passive: true });
+
+  backToTop?.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  });
+
+  updateVisibility();
+</script>
