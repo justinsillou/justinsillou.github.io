@@ -1,0 +1,64 @@
+---
+// À importer et placer dans BaseFooter.astro : <ReadingSizeToggle />
+// Fonctionne avec le script is:inline ajouté dans BaseLayout.astro
+// (qui applique la taille sauvegardée dès le chargement, avant peinture).
+---
+
+<div
+  class="inline-flex items-center gap-1 rounded-full border border-neutral-200 dark:border-neutral-800 p-1"
+  role="group"
+  aria-label="Taille du texte"
+>
+  <button
+    type="button"
+    data-size="sm"
+    class="reading-size-btn w-7 h-7 flex items-center justify-center rounded-full text-xs text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+    aria-label="Texte petit"
+  >
+    A
+  </button>
+  <button
+    type="button"
+    data-size="md"
+    class="reading-size-btn w-7 h-7 flex items-center justify-center rounded-full text-sm text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+    aria-label="Texte normal"
+  >
+    A
+  </button>
+  <button
+    type="button"
+    data-size="lg"
+    class="reading-size-btn w-7 h-7 flex items-center justify-center rounded-full text-base text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+    aria-label="Texte grand"
+  >
+    A
+  </button>
+</div>
+
+<script>
+  const SIZES: Record<string, string> = { sm: "15px", md: "16px", lg: "18px" };
+
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".reading-size-btn");
+
+  const applyActiveState = (size: string) => {
+    buttons.forEach((btn) => {
+      const isActive = btn.dataset.size === size;
+      btn.setAttribute("aria-pressed", String(isActive));
+      btn.classList.toggle("bg-neutral-900", isActive);
+      btn.classList.toggle("dark:bg-neutral-100", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("dark:text-neutral-900", isActive);
+    });
+  };
+
+  applyActiveState(localStorage.getItem("fontSize") ?? "md");
+
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const size = btn.dataset.size ?? "md";
+      document.documentElement.style.fontSize = SIZES[size] ?? SIZES.md;
+      localStorage.setItem("fontSize", size);
+      applyActiveState(size);
+    });
+  });
+</script>

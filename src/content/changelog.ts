@@ -1,5 +1,18 @@
 export const changelog = [
     {
+        version: "0.9.4",
+        date: "19/08/2026",
+        title: "Ajout de la page de CV",
+        changes: [
+            "Ajout d'une page de CV",
+            "Modification du menu",
+            "Édition du footer [WIP]",
+            "Modification de la page 404",
+            "Préparation de la page projet + Lien avec la page CV",
+            "Réflexion sur l'i18n"
+        ],
+    },
+    {
         version: "0.9.3",
         date: "18/08/2026",
         title: "Ajout d'un menu burger [WIP]",

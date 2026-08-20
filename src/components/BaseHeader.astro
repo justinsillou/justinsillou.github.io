@@ -36,16 +36,33 @@ const menuItems = [
     )
   }
 
-  <!-- Boutons -->
+  <!-- Zone droite -->
   <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
-    <!-- Menu -->
+    <!-- Liens de navigation : desktop uniquement -->
+    <nav
+      aria-label="Navigation principale"
+      class="hidden md:flex items-center gap-1 mr-1 px-1.5 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur"
+    >
+      {
+        menuItems.map((item) => (
+          <a
+            href={item.href}
+            class="px-3 py-1.5 rounded-full text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- Menu bulle : tablette / mobile uniquement -->
     <button
       id="menu-toggle"
       type="button"
       aria-label="Ouvrir le menu"
       aria-expanded="false"
       aria-controls="site-menu"
-      class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+      class="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
     >
       <!-- Menu -->
       <svg
@@ -115,12 +132,12 @@ const menuItems = [
     </button>
   </div>
 
-  <!-- Menu flottant -->
+  <!-- Menu flottant en bulle : tablette / mobile uniquement -->
   <nav
     id="site-menu"
-    aria-label="Navigation principale"
+    aria-label="Navigation principale (mobile)"
     aria-hidden="true"
-    class="fixed top-16 right-4 z-40 w-48 origin-top-right opacity-0 scale-95 pointer-events-none transition-all duration-150"
+    class="md:hidden fixed top-16 right-4 z-40 w-48 origin-top-right opacity-0 scale-95 pointer-events-none transition-all duration-150"
   >
     <div
       class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl shadow-lg p-2"
@@ -137,29 +154,6 @@ const menuItems = [
           ))
         }
       </div>
-
-      {/*
-      <div class="my-2 border-t border-neutral-200 dark:border-neutral-800"></div>
-
-      <div class="space-y-1">
-        <a
-          href="https://github.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="block px-3 py-2 rounded-xl text-sm text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-        >
-          GitHub
-        </a>
-
-        <a
-          href="https://www.linkedin.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="block px-3 py-2 rounded-xl text-sm text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-        >
-          LinkedIn
-        </a>
-      </div>*/}
     </div>
   </nav>
 </header>
@@ -213,6 +207,15 @@ const menuItems = [
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
+      setMenuState(false);
+    }
+  });
+
+  // Sur desktop, si la fenêtre est agrandie pendant que le menu mobile est ouvert,
+  // on referme proprement pour éviter un état incohérent.
+  const mq = window.matchMedia("(min-width: 768px)");
+  mq.addEventListener("change", (e) => {
+    if (e.matches && menuOpen) {
       setMenuState(false);
     }
   });

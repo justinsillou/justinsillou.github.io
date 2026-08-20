@@ -1,0 +1,45 @@
+---
+// À importer et placer dans BaseFooter.astro : <EcoBadge />
+---
+
+<div
+  class="inline-flex items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500"
+  title="Temps de chargement de cette page — un site léger, hébergé statiquement."
+>
+  <svg
+    class="w-3.5 h-3.5 text-emerald-500 shrink-0"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M11 20A7 7 0 0 1 4 13c0-4 4-9 7-11 3 2 7 7 7 11a7 7 0 0 1-7 7Z"></path>
+    <path d="M11 20v-6"></path>
+  </svg>
+  <span id="eco-badge-text">calcul en cours…</span>
+</div>
+
+<script>
+  window.addEventListener("load", () => {
+    const el = document.getElementById("eco-badge-text");
+    if (!el) return;
+
+    try {
+      const nav = performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined;
+
+      const loadMs = nav ? nav.loadEventEnd - nav.startTime : null;
+
+      el.textContent =
+        loadMs !== null && loadMs > 0
+          ? `Chargée en ${loadMs.toFixed(1)} ms`
+          : "Page statique et légère";
+    } catch {
+      el.textContent = "Page statique et légère";
+    }
+  });
+</script>
