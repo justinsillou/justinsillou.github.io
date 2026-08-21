@@ -1,860 +1,321 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  periods,
-  education,
-  skillGroups,
-  softSkillList,
-} from "../../data/cv";
+import { normalize } from "./normalize";
 
-import TerminalOutput from "./TerminalOutput";
+/**
+ * Terminal minimal.
+ *
+ * Une seule ligne de commande, une liste filtrée, rien d'autre :
+ * pas de fausse fenêtre macOS, pas d'historique à faire défiler.
+ * Ouverture au clic sur le `$`, ou avec Ctrl/⌘ + K.
+ *
+ * La liste couvre les pages du site et les articles du blog, ce qui en fait
+ * aussi la recherche du site. Les articles sont fournis par BaseLayout.
+ */
 
-type OutputType =
-  | "default"
-  | "muted"
-  | "error"
-  | "success"
-  | "command";
-
-type HistoryEntry = {
-  id: number;
-  content: React.ReactNode;
-  type?: OutputType;
+export type PostEntry = {
+  title: string;
+  href: string;
+  tags: string[];
+  date: string;
 };
 
-const COMMANDS = [
-  "help",
-  "about",
-  "cv",
-  "skills",
-  "education",
-  "contact",
-  "clear",
-  "exit",
-];
+type Group = "pages" | "articles" | "actions";
 
-export default function TerminalIsland() {
+type Command = {
+  name: string;
+  hint: string;
+  group: Group;
+  /** Mots supplémentaires pris en compte par la recherche. */
+  keywords?: string;
+  /** Absente de la liste tant qu'on ne tape pas son nom. */
+  hidden?: boolean;
+  /** Renvoie un texte à afficher, ou rien si l'action suffit. */
+  run: () => string | void;
+};
+
+const goTo = (href: string) => () => {
+  window.location.href = href;
+};
+
+const GROUP_LABELS: Record<Group, string> = {
+  pages: "Pages",
+  articles: "Articles",
+  actions: "Actions",
+};
+
+export default function TerminalIsland({
+  posts = [],
+}: {
+  posts?: PostEntry[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] =
-    useState(false);
-  const [isMaximized, setIsMaximized] =
-    useState(false);
+  const [value, setValue] = useState("");
+  const [selected, setSelected] = useState(0);
+  const [message, setMessage] = useState<string | null>(null);
 
-  const [command, setCommand] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [history, setHistory] = useState<
-    HistoryEntry[]
-  >([]);
-
-  const [commandHistory, setCommandHistory] =
-    useState<string[]>([]);
-
-  const [historyIndex, setHistoryIndex] =
-    useState(-1);
-
-  const inputRef =
-    useRef<HTMLInputElement>(null);
-
-  const outputRef =
-    useRef<HTMLDivElement>(null);
-
-  const historyId = useRef(0);
-
-  function openTerminal() {
-    setIsOpen(true);
-    setIsMinimized(false);
-  }
-
-  function closeTerminal() {
-    setIsOpen(false);
-    setIsMinimized(false);
-    setIsMaximized(false);
-    setCommand("");
-    setHistoryIndex(-1);
-  }
-
-  function minimizeTerminal() {
-    setIsMinimized(true);
-  }
-
-  function restoreTerminal() {
-    setIsMinimized(false);
-  }
-
-  function toggleMaximize() {
-    setIsMaximized((current) => !current);
-    setIsMinimized(false);
-  }
-
-  function addHistory(
-    content: React.ReactNode,
-    type: OutputType = "default",
-  ) {
-    historyId.current += 1;
-
-    setHistory((current) => [
-      ...current,
+  const commands = useMemo<Command[]>(
+    () => [
+      { name: "accueil", hint: "/", group: "pages", run: goTo("/") },
+      { name: "now", hint: "/now", group: "pages", run: goTo("/now") },
       {
-        id: historyId.current,
-        content,
-        type,
+        name: "projets",
+        hint: "/projets",
+        group: "pages",
+        run: goTo("/projets"),
       },
-    ]);
-  }
+      { name: "blog", hint: "/blog", group: "pages", run: goTo("/blog") },
+      { name: "cv", hint: "/cv", group: "pages", run: goTo("/cv") },
+      {
+        name: "changelog",
+        hint: "/changelog",
+        group: "pages",
+        run: goTo("/changelog"),
+      },
 
-  function clearTerminal() {
-    setHistory([]);
-  }
+      ...posts.map<Command>((post) => ({
+        name: post.title,
+        hint: post.date,
+        group: "articles",
+        keywords: post.tags.join(" "),
+        run: goTo(post.href),
+      })),
 
-  function executeCommand(
-    rawCommand: string,
-  ) {
-    const value = rawCommand.trim();
+      {
+        name: "github",
+        hint: "github.com/justinsillou",
+        group: "actions",
+        run: goTo("https://github.com/justinsillou"),
+      },
+      {
+        name: "linkedin",
+        hint: "linkedin.com/in/justinsillou",
+        group: "actions",
+        run: goTo("https://www.linkedin.com/in/justinsillou/"),
+      },
+      {
+        name: "theme",
+        hint: "basculer clair / sombre",
+        group: "actions",
+        run: () => {
+          const isDark = document.documentElement.classList.toggle("dark");
+          localStorage.setItem("theme", isDark ? "dark" : "light");
+          return isDark ? "Thème sombre." : "Thème clair.";
+        },
+      },
+      {
+        name: "about",
+        hint: "en une ligne",
+        group: "actions",
+        run: () =>
+          "Justin Sillou — développeur back-end à Lille. PHP, TypeScript, un peu de tout le reste.",
+      },
+      {
+        name: "nitsuj",
+        hint: "?",
+        group: "actions",
+        hidden: true,
+        run: () => {
+          const root = document.documentElement;
+          const miroir = root.classList.toggle("miroir");
 
-    if (!value) {
+          localStorage.setItem("miroir", miroir ? "1" : "0");
+
+          return miroir
+            ? "ǝɹıoɹıɯ uǝ ǝʇıS — retapez nitsuj pour revenir."
+            : "Retour à l'endroit.";
+        },
+      },
+    ],
+    [posts],
+  );
+
+  const matches = useMemo(() => {
+    const query = normalize(value.trim());
+
+    // Les commandes cachées ne sortent que si on tape leur nom.
+    if (!query) return commands.filter((command) => !command.hidden);
+
+    return commands.filter((command) =>
+      command.hidden
+        ? normalize(command.name).startsWith(query)
+        : normalize(
+            `${command.name} ${command.hint} ${command.keywords ?? ""}`,
+          ).includes(query),
+    );
+  }, [commands, value]);
+
+  const close = () => {
+    setIsOpen(false);
+    setValue("");
+    setSelected(0);
+    setMessage(null);
+  };
+
+  const execute = (command: Command | undefined) => {
+    if (!command) {
+      setMessage(`Aucun résultat pour : ${value.trim()}`);
       return;
     }
 
-    const normalized = value.toLowerCase();
+    const output = command.run();
 
-    setCommandHistory((current) => [
-      ...current.filter(
-        (item) => item !== value,
-      ),
-      value,
-    ]);
+    setValue("");
+    setSelected(0);
 
-    setHistoryIndex(-1);
+    if (typeof output === "string") setMessage(output);
+    else setMessage(null);
+  };
 
-    addHistory(
-      <span>
-        <span className="text-neutral-400">
-          $
-        </span>{" "}
-        {value}
-      </span>,
-      "command",
-    );
-
-    switch (normalized) {
-      case "help":
-        addHistory(
-          <div className="space-y-1">
-            <p className="text-neutral-900 dark:text-neutral-100">
-              Available commands:
-            </p>
-
-            <div className="mt-3 grid grid-cols-[110px_1fr] gap-x-4 gap-y-1 text-neutral-500 dark:text-neutral-400">
-              <span>about</span>
-              <span>À propos</span>
-
-              <span>cv</span>
-              <span>Parcours professionnel</span>
-
-              <span>skills</span>
-              <span>Compétences</span>
-
-              <span>education</span>
-              <span>Formation</span>
-
-              <span>contact</span>
-              <span>Contact</span>
-
-              <span>clear</span>
-              <span>Effacer le terminal</span>
-
-              <span>exit</span>
-              <span>Fermer</span>
-            </div>
-          </div>,
-        );
-
-        break;
-
-      case "about":
-        addHistory(
-          <div className="space-y-3">
-            <p className="text-neutral-900 dark:text-neutral-100">
-              Justin Sillou
-            </p>
-
-            <p className="text-neutral-500 dark:text-neutral-400">
-              Développeur Fullstack — Lille,
-              Hauts-de-France
-            </p>
-
-            <p className="text-neutral-500 dark:text-neutral-400">
-              Backend · Web · DevOps
-            </p>
-          </div>,
-        );
-
-        break;
-
-      case "cv":
-        addHistory(
-          <div className="space-y-6">
-            {periods.map((group) => (
-              <div key={group.label}>
-                <p className="text-neutral-400 dark:text-neutral-500">
-                  {group.label}
-                </p>
-
-                <div className="mt-2 space-y-4">
-                  {group.items.map(
-                    (experience) => (
-                      <div
-                        key={`${experience.company}-${experience.period}`}
-                      >
-                        <p className="text-neutral-900 dark:text-neutral-100">
-                          {experience.role}
-                        </p>
-
-                        <p className="text-neutral-500 dark:text-neutral-400">
-                          {experience.company}
-                          {" · "}
-                          {experience.contract}
-                        </p>
-
-                        {experience.projects && (
-                          <div className="mt-2 pl-4 border-l border-neutral-200 dark:border-neutral-800 space-y-2">
-                            {experience.projects.map(
-                              (project) => (
-                                <div
-                                  key={
-                                    project.name
-                                  }
-                                >
-                                  <p className="text-neutral-700 dark:text-neutral-300">
-                                    {project.name}
-                                  </p>
-
-                                  <p className="text-neutral-400 dark:text-neutral-500">
-                                    {
-                                      project.description
-                                    }
-                                  </p>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>,
-        );
-
-        break;
-
-      case "skills":
-        addHistory(
-          <div className="space-y-5">
-            {skillGroups.map((group) => (
-              <div key={group.title}>
-                <p className="text-xs uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                  {group.title}
-                </p>
-
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-                  {group.skills.map(
-                    (skill) => (
-                      <span
-                        key={skill}
-                        className="text-neutral-700 dark:text-neutral-300"
-                      >
-                        {skill}
-                      </span>
-                    ),
-                  )}
-                </div>
-              </div>
-            ))}
-
-            <div>
-              <p className="text-xs uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                Compétences transversales
-              </p>
-
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-neutral-500 dark:text-neutral-400">
-                {softSkillList.map(
-                  (skill) => (
-                    <span key={skill}>
-                      {skill}
-                    </span>
-                  ),
-                )}
-              </div>
-            </div>
-          </div>,
-        );
-
-        break;
-
-      case "education":
-        addHistory(
-          <div className="space-y-5">
-            {education.map((item) => (
-              <div key={item.degree}>
-                <p className="text-neutral-900 dark:text-neutral-100">
-                  {item.degree}
-                </p>
-
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  {item.school}
-                </p>
-              </div>
-            ))}
-          </div>,
-        );
-
-        break;
-
-      case "contact":
-        addHistory(
-          <div className="space-y-2">
-            <p className="text-neutral-900 dark:text-neutral-100">
-              Contact
-            </p>
-
-            <p className="text-neutral-500 dark:text-neutral-400">
-              Les informations de contact
-              sont disponibles sur le site.
-            </p>
-          </div>,
-        );
-
-        break;
-
-      case "clear":
-        clearTerminal();
-        break;
-
-      case "exit":
-      case "quit":
-        closeTerminal();
-        break;
-
-      default:
-        addHistory(
-          <div>
-            <p>
-              Command not found:{" "}
-              <span className="text-neutral-900 dark:text-neutral-100">
-                {value}
-              </span>
-            </p>
-
-            <p className="mt-1 text-neutral-400 dark:text-neutral-500">
-              Type "help" to see available
-              commands.
-            </p>
-          </div>,
-          "error",
-        );
-    }
-  }
-
-  function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
-
-    executeCommand(command);
-    setCommand("");
-  }
-
-  function handleInputKeyDown(
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ) {
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-
-      if (!commandHistory.length) {
+  // Ouverture / fermeture au clavier, disponible partout sur le site.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        setIsOpen((open) => !open);
         return;
       }
 
-      const nextIndex =
-        historyIndex === -1
-          ? commandHistory.length - 1
-          : Math.max(
-              0,
-              historyIndex - 1,
-            );
+      if (event.key === "Escape") close();
+    };
 
-      setHistoryIndex(nextIndex);
-      setCommand(
-        commandHistory[nextIndex] ?? "",
-      );
-    }
+    const onOpenRequest = () => setIsOpen(true);
 
+    window.addEventListener("keydown", onKeyDown);
+    document.addEventListener("open-search", onOpenRequest);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("open-search", onOpenRequest);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) inputRef.current?.focus();
+  }, [isOpen]);
+
+  useEffect(() => {
+    setSelected(0);
+  }, [value]);
+
+  const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-
-      if (historyIndex === -1) {
-        return;
-      }
-
-      const nextIndex =
-        historyIndex + 1;
-
-      if (
-        nextIndex >=
-        commandHistory.length
-      ) {
-        setHistoryIndex(-1);
-        setCommand("");
-        return;
-      }
-
-      setHistoryIndex(nextIndex);
-      setCommand(
-        commandHistory[nextIndex] ?? "",
-      );
+      setSelected((index) => Math.min(index + 1, matches.length - 1));
     }
 
-    if (
-      event.key === "l" &&
-      (event.ctrlKey || event.metaKey)
-    ) {
+    if (event.key === "ArrowUp") {
       event.preventDefault();
-      clearTerminal();
+      setSelected((index) => Math.max(index - 1, 0));
     }
 
     if (event.key === "Tab") {
       event.preventDefault();
-
-      const current =
-        command.trim().toLowerCase();
-
-      if (!current) {
-        return;
-      }
-
-      const matches = COMMANDS.filter(
-        (item) =>
-          item.startsWith(current),
-      );
-
-      if (matches.length === 1) {
-        setCommand(matches[0]);
-      }
+      const match = matches[selected];
+      if (match) setValue(match.name);
     }
-  }
+  };
 
-  useEffect(() => {
-    if (!isOpen || isMinimized) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
-
-    function handleKeyDown(
-      event: KeyboardEvent,
-    ) {
-      if (event.key === "Escape") {
-        closeTerminal();
-      }
-    }
-
-    window.addEventListener(
-      "keydown",
-      handleKeyDown,
-    );
-
-    return () => {
-      window.clearTimeout(timeout);
-
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown,
-      );
-    };
-  }, [isOpen, isMinimized]);
-
-  useEffect(() => {
-    if (!outputRef.current) {
-      return;
-    }
-
-    outputRef.current.scrollTop =
-      outputRef.current.scrollHeight;
-  }, [history]);
-
-  /*
-   * Mobile :
-   * on ne rend absolument rien sous md.
-   */
   return (
-    <div className="hidden md:block">
+    <div>
       {!isOpen && (
         <button
           type="button"
-          onClick={openTerminal}
-          aria-label="Ouvrir le terminal"
-          className="
-            fixed
-            bottom-5
-            left-5
-            z-40
-            w-8
-            h-8
-            flex
-            items-center
-            justify-center
-            cv-mono
-            text-sm
-            text-neutral-300
-            dark:text-neutral-700
-            hover:text-neutral-600
-            dark:hover:text-neutral-400
-            transition-colors
-            select-none
-          "
+          onClick={() => setIsOpen(true)}
+          aria-label="Ouvrir le terminal (Ctrl + K)"
+          title="Ctrl + K"
+          className="cv-mono fixed bottom-5 left-5 z-40 hidden h-8 w-8 select-none items-center justify-center text-sm text-neutral-300 transition-colors hover:text-neutral-600 md:flex dark:text-neutral-700 dark:hover:text-neutral-400"
         >
           $
         </button>
       )}
 
-      {isOpen && isMinimized && (
-        <button
-          type="button"
-          onClick={restoreTerminal}
-          className="
-            fixed
-            bottom-0
-            left-5
-            z-50
-            flex
-            items-center
-            gap-3
-            h-9
-            px-4
-            rounded-t-md
-            border
-            border-neutral-300
-            dark:border-neutral-700
-            bg-white
-            dark:bg-neutral-950
-            shadow-lg
-            cv-mono
-            text-xs
-            text-neutral-600
-            dark:text-neutral-400
-            hover:text-neutral-900
-            dark:hover:text-neutral-100
-            transition-colors
-          "
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
-
-          terminal
-
-          <span className="text-neutral-300 dark:text-neutral-700">
-            $
-          </span>
-        </button>
-      )}
-
-      {isOpen && !isMinimized && (
+      {isOpen && (
         <>
           <div
-            className="
-              fixed
-              inset-0
-              z-40
-              bg-neutral-950/10
-              dark:bg-black/30
-              backdrop-blur-[2px]
-            "
-            onClick={closeTerminal}
+            className="fixed inset-0 z-40 bg-white/60 backdrop-blur-[2px] dark:bg-black/50"
+            onClick={close}
           />
 
-          <section
-            className={`
-              fixed
-              z-50
-              overflow-hidden
-              flex
-              flex-col
-              rounded-lg
-              border
-              border-neutral-300
-              dark:border-neutral-700
-              bg-white
-              dark:bg-neutral-950
-              shadow-2xl
-
-              ${
-                isMaximized
-                  ? "left-[5vw] top-[5vh] w-[90vw] h-[90vh]"
-                  : "left-6 bottom-6 w-[760px] h-[70vh] max-h-[720px]"
-              }
-            `}
-            aria-label="Terminal"
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Recherche et navigation"
+            className="fixed left-1/2 top-[18vh] z-50 w-[min(36rem,calc(100vw-3rem))] -translate-x-1/2 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-950"
           >
-            {/* Header */}
-            <header
-              className="
-                relative
-                shrink-0
-                h-11
-                flex
-                items-center
-                justify-between
-                px-4
-                border-b
-                border-neutral-200
-                dark:border-neutral-800
-                bg-neutral-50
-                dark:bg-neutral-900
-              "
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                execute(matches[selected]);
+              }}
+              className="flex items-center gap-2 px-4 py-3"
             >
-              {/* Boutons macOS */}
-                <div className="flex items-center gap-2">
-                {/* Fermer */}
-                <button
-                    type="button"
-                    onClick={closeTerminal}
-                    aria-label="Fermer"
-                    className="
-                    group
-                    w-3
-                    h-3
-                    rounded-full
-                    bg-[#ff5f57]
-                    flex
-                    items-center
-                    justify-center
-                    transition-transform
-                    hover:scale-110
-                    "
-                >
-                    <span
-                    className="
-                        opacity-0
-                        group-hover:opacity-100
-                        text-[8px]
-                        leading-none
-                        text-[#8a1c17]
-                        font-semibold
-                    "
-                    >
-                    ×
-                    </span>
-                </button>
+              <span className="cv-mono text-sm text-neutral-400 dark:text-neutral-600">
+                $
+              </span>
 
-                {/* Réduire */}
-                <button
-                    type="button"
-                    onClick={minimizeTerminal}
-                    aria-label="Réduire"
-                    className="
-                    group
-                    w-3
-                    h-3
-                    rounded-full
-                    bg-[#febc2e]
-                    flex
-                    items-center
-                    justify-center
-                    transition-transform
-                    hover:scale-110
-                    "
-                >
-                    <span
-                    className="
-                        opacity-0
-                        group-hover:opacity-100
-                        text-[7px]
-                        leading-none
-                        text-[#7a5200]
-                        font-semibold
-                    "
-                    >
-                    −
-                    </span>
-                </button>
+              <input
+                ref={inputRef}
+                value={value}
+                onChange={(event) => setValue(event.target.value)}
+                onKeyDown={onInputKeyDown}
+                type="text"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="page, article, commande…"
+                aria-label="Recherche"
+                className="cv-mono w-full border-none bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-300 dark:text-neutral-100 dark:placeholder:text-neutral-700"
+              />
 
-                {/* Agrandir */}
-                <button
-                    type="button"
-                    onClick={toggleMaximize}
-                    aria-label={
-                    isMaximized
-                        ? "Restaurer"
-                        : "Agrandir"
-                    }
-                    className="
-                    group
-                    w-3
-                    h-3
-                    rounded-full
-                    bg-[#28c840]
-                    flex
-                    items-center
-                    justify-center
-                    transition-transform
-                    hover:scale-110
-                    "
-                >
-                    <span
-                    className="
-                        opacity-0
-                        group-hover:opacity-100
-                        text-[7px]
-                        leading-none
-                        text-[#12631c]
-                        font-semibold
-                    "
-                    >
-                    {isMaximized ? "<" : ">"}
-                    </span>
-                </button>
-            </div>
-              <span
-                className="
-                    absolute
-                    left-1/2
-                    -translate-x-1/2
-                    cv-mono
-                    text-[11px]
-                    text-neutral-400
-                    dark:text-neutral-500
-                    select-none
-                "
-                >
-                terminal
-                </span>
-
-              <button
-                type="button"
-                onClick={closeTerminal}
-                className="
-                  cv-mono
-                  text-xs
-                  text-neutral-400
-                  dark:text-neutral-500
-                  hover:text-neutral-900
-                  dark:hover:text-neutral-100
-                  transition-colors
-                "
-              >
+              <kbd className="cv-mono shrink-0 text-[10px] text-neutral-300 dark:text-neutral-700">
                 esc
-              </button>
-            </header>
+              </kbd>
+            </form>
 
-            {/* Terminal */}
-            <div
-              ref={outputRef}
-              onClick={() =>
-                inputRef.current?.focus()
-              }
-              className="
-                flex-1
-                overflow-y-auto
-                px-6
-                py-6
-                lg:px-8
-                lg:py-7
-                cv-mono
-                text-xs
-                lg:text-sm
-                leading-relaxed
-                cursor-text
-              "
-            >
-              <div className="text-neutral-400 dark:text-neutral-500 mb-6">
-                <p>
-                  Justin Sillou terminal
-                </p>
+            {message && (
+              <p className="cv-mono border-t border-neutral-100 px-4 py-3 text-xs leading-relaxed text-neutral-500 dark:border-neutral-900 dark:text-neutral-400">
+                {message}
+              </p>
+            )}
 
-                <p>
-                  Type{" "}
-                  <span className="text-neutral-900 dark:text-neutral-100">
-                    help
-                  </span>{" "}
-                  to get started.
-                </p>
-              </div>
+            <ul className="max-h-[22rem] overflow-y-auto border-t border-neutral-100 py-1 dark:border-neutral-900">
+              {matches.length === 0 && (
+                <li className="cv-mono px-4 py-3 text-xs text-neutral-400 dark:text-neutral-600">
+                  aucun résultat
+                </li>
+              )}
 
-              <div className="space-y-4">
-                {history.map((entry) => (
-                  <TerminalOutput
-                    key={entry.id}
-                    type={entry.type}
+              {matches.map((command, index) => (
+                <li key={`${command.group}-${command.name}`}>
+                  {/* En-tête affiché au premier élément de chaque groupe. */}
+                  {matches[index - 1]?.group !== command.group && (
+                    <p className="cv-mono px-4 pb-1 pt-3 text-[10px] uppercase text-neutral-300 dark:text-neutral-700">
+                      {GROUP_LABELS[command.group]}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onMouseEnter={() => setSelected(index)}
+                    onClick={() => execute(command)}
+                    className={`cv-mono flex w-full items-baseline justify-between gap-4 px-4 py-2 text-left text-xs transition-colors ${
+                      index === selected
+                        ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }`}
                   >
-                    {entry.content}
-                  </TerminalOutput>
-                ))}
-              </div>
+                    <span className="min-w-0 truncate">{command.name}</span>
 
-              {/* Prompt */}
-              <form
-                onSubmit={handleSubmit}
-                className="flex items-center mt-6"
-              >
-                <span className="shrink-0 text-neutral-900 dark:text-neutral-100">
-                  $
-                </span>
-
-                <div className="relative flex-1 ml-2">
-                  <input
-                    ref={inputRef}
-                    value={command}
-                    onChange={(event) =>
-                      setCommand(
-                        event.target.value,
-                      )
-                    }
-                    onKeyDown={
-                      handleInputKeyDown
-                    }
-                    type="text"
-                    autoComplete="off"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    className="
-                      w-full
-                      bg-transparent
-                      border-none
-                      outline-none
-                      text-neutral-900
-                      dark:text-neutral-100
-                      caret-transparent
-                    "
-                    aria-label="Commande terminal"
-                  />
-
-                  <span
-                    className="
-                      pointer-events-none
-                      absolute
-                      left-0
-                      top-0
-                      h-[1.25em]
-                      w-[7px]
-                      bg-neutral-900
-                      dark:bg-neutral-100
-                      animate-pulse
-                    "
-                    style={{
-                      transform: `translateX(${command.length * 0.6}em)`,
-                    }}
-                  />
-                </div>
-              </form>
-            </div>
-          </section>
+                    <span className="shrink-0 text-neutral-300 dark:text-neutral-700">
+                      {command.hint}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </>
       )}
     </div>

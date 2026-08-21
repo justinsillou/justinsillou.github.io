@@ -4,25 +4,72 @@ import BaseFooter from "../components/BaseFooter.astro";
 import BarryAllen from "../components/BarryAllen.astro";
 import BackToTop from "../components/BackToTop.astro";
 import TerminalIsland from "../components/terminal/TerminalIsland";
-import AidesBubble from "../components/AidesBubble.astro";
+import { getCollection } from "astro:content";
+
+import "@fontsource/dm-sans/400.css";
+import "@fontsource/dm-sans/500.css";
+import "@fontsource/jetbrains-mono/400.css";
 import "../styles/global.css";
 
-const { title, fullWidth = false } = Astro.props;
+type Props = {
+  title?: string;
+  description?: string;
+  fullWidth?: boolean;
+  /** Passer à `true` pour retirer une page des moteurs de recherche. */
+  noindex?: boolean;
+};
+
+const {
+  title,
+  description = "Justin Sillou — développeur back-end à Lille. Projets, notes et veille.",
+  fullWidth = false,
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const pageTitle = title ?? "Justin Sillou";
+
+// Les articles sont injectés dans la palette de commandes (Ctrl + K) pour
+// qu'elle serve aussi de recherche dans le blog.
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .map((post) => ({
+    title: post.data.title,
+    href: `/blog/${post.id}`,
+    tags: post.data.tags,
+    date: post.data.pubDate.toLocaleDateString("fr-FR", {
+      month: "short",
+      year: "numeric",
+    }),
+  }));
 ---
 
 <html lang="fr" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
 
-    <title>{title ?? "Justin Sillou"}</title>
+    <title>{pageTitle}</title>
 
-    <meta
-      name="description"
-      content="Site en cours de refonte. Me retrouver sur GitHub et LinkedIn en attendant."
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Justin Sillou — Blog"
+      href="/rss.xml"
     />
 
-    <meta name="robots" content="noindex" />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta name="twitter:card" content="summary" />
 
     <script is:inline>
       const theme =
@@ -33,9 +80,15 @@ const { title, fullWidth = false } = Astro.props;
 
       document.documentElement.classList.toggle("dark", theme === "dark");
 
+      document.documentElement.classList.toggle(
+        "miroir",
+        localStorage.getItem("miroir") === "1",
+      );
+
       const fontSizes = { sm: "15px", md: "16px", lg: "18px" };
       const fontSize = localStorage.getItem("fontSize") ?? "md";
-      document.documentElement.style.fontSize = fontSizes[fontSize] ?? fontSizes.md;
+      document.documentElement.style.fontSize =
+        fontSizes[fontSize] ?? fontSizes.md;
     </script>
   </head>
 
@@ -51,7 +104,7 @@ const { title, fullWidth = false } = Astro.props;
         </main>
       ) : (
         <main class="flex-1 flex items-center justify-center">
-          <div class="w-full max-w-md px-6">
+          <div class="w-full max-w-xl px-6">
             <slot />
           </div>
         </main>
@@ -62,9 +115,9 @@ const { title, fullWidth = false } = Astro.props;
 
     <BackToTop />
 
-    <TerminalIsland client:load />
+    <TerminalIsland client:load posts={posts} />
 
-    {/*<AidesBubble />*/}
+    {/* <AidesBubble /> — pour le réactiver, réimporter le composant en tête */}
 
     <BarryAllen />
 
@@ -74,5 +127,5 @@ const { title, fullWidth = false } = Astro.props;
         localStorage.setItem("theme", isDark ? "dark" : "light");
       });
     </script>
-   </body>
+  </body>
 </html>

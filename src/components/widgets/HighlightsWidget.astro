@@ -1,0 +1,51 @@
+---
+import Widget from "./Widget.astro";
+import { highlights } from "../../data/highlights";
+
+/**
+ * Raccourci « à la une » : sélection manuelle, éditée dans
+ * `src/data/highlights.ts`.
+ */
+
+type Props = {
+  title?: string;
+  limit?: number;
+  class?: string;
+};
+
+const { title = "À la une", limit, class: className = "" } = Astro.props;
+
+const items = limit ? highlights.slice(0, limit) : highlights;
+---
+
+{
+  items.length > 0 && (
+    <Widget title={title} class={className}>
+      <ul class="divide-y divide-neutral-100 dark:divide-neutral-900">
+        {items.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noopener noreferrer" : undefined}
+              class="group block py-2.5 first:pt-0 last:pb-0"
+            >
+              <span class="text-sm text-neutral-900 underline-offset-4 group-hover:underline dark:text-neutral-100">
+                {item.label}
+                {item.external && (
+                  <span class="text-neutral-400 dark:text-neutral-500"> ↗</span>
+                )}
+              </span>
+
+              {item.detail && (
+                <span class="mt-0.5 block text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                  {item.detail}
+                </span>
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </Widget>
+  )
+}
