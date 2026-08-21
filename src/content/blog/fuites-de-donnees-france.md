@@ -1,10 +1,11 @@
 ---
 title: "Fuites de données en France : l'été où tout a lâché"
-description: "Le fisc trois fois, l'Éducation nationale, SFR, un éditeur médical : en quelques semaines de l'été 2026, la France a exposé ses fichiers les plus sensibles. Ce qui a fuité, comment, et ce qu'on peut encore faire."
+description: "Le fisc trois fois, l'Éducation nationale, SFR, un éditeur médical : en quelques semaines de cet été 2026, la France a exposé ses fichiers les plus sensibles. Ce qui a fuité, comment, et ce qu'on peut encore faire."
 pubDate: 2026-08-21
 tags: ["Sécurité", "RGPD", "Veille"]
 evergreen: true
 widget: leaks
+ai: editing
 sources:
   - label: "CNIL — Rapport annuel 2025"
     href: "https://www.cnil.fr/fr/rapport-annuel-2025"
@@ -26,15 +27,11 @@ sources:
     href: "https://haveibeenpwned.com/"
 ---
 
-*Article suivi : le site est reconstruit chaque matin à 6 h 17, et le relevé des
-dernières fuites en bas de page suit automatiquement.*
-
-Il y a quelques années, une fuite de données faisait la une pendant une semaine.
-Aujourd'hui, elle occupe un entrefilet — quand elle en occupe un. Ce n'est pas que
+Il y a quelques années, une fuite de données faisait grand bruit pendant une semaine. 
+Aujourd'hui, elle se résume à une courte note — quand elle n'est pas ignorée. Ce n'est pas que
 le sujet soit devenu moins grave : c'est qu'il est devenu quotidien. L'été 2026 a
 enchaîné le fisc, l'Éducation nationale, un opérateur télécom et un éditeur
-médical, à quelques jours d'intervalle, sans que ça ne dépasse trois jours de
-couverture.
+médical, à quelques jours d'intervalle.
 
 ## Le décompte
 
@@ -52,7 +49,7 @@ qui devient public.
 
 ## L'été 2026, en trois dossiers
 
-**Le fisc, trois fois.** La DGFiP a d'abord reconnu en février un accès illégitime
+**Le fisc, trois fois (combo).** La DGFiP a d'abord reconnu en février un accès illégitime
 au fichier national des comptes bancaires (FICOBA) : environ 1,2 million de
 comptes, avec identité, adresse, identifiant fiscal et IBAN. Fin juin, nouvelle
 intrusion, cette fois dans le système d'information fiscal — état civil, numéro
@@ -119,7 +116,7 @@ données redeviennent secrètes.
 ## Ce qui est à votre portée
 
 Ni la CNIL ni le RGPD ne peuvent annuler une fuite. En revanche, quelques gestes
-coupent la plupart des exploitations en aval :
+simples peuvent vous servir :
 
 1. **Vérifier l'exposition.** [Have I Been Pwned](https://haveibeenpwned.com/) pour
    les adresses mail et numéros de téléphone. Incomplet, mais gratuit et immédiat.
@@ -145,7 +142,7 @@ incrémenter, des journaux que personne ne lit. Les fondamentaux, appliqués aux
 accès **légitimes** autant qu'aux accès externes.
 
 La question utile n'est pas « est-ce qu'on peut entrer ? », mais : si un accès
-autorisé est détourné, en combien de temps est-ce qu'on le voit, et combien de
+autorisé est détourné, en combien de temps est-ce qu'on le voit et combien de
 lignes sortent d'ici là ? Sur les dossiers de cet été, la réponse tient en un mot :
 trop.
 
@@ -154,6 +151,6 @@ trop.
 *Article suivi, mis à jour au fil de l'actualité. Les chiffres cités sont ceux
 communiqués par les organismes concernés, par la CNIL ou par la presse au moment
 de la rédaction ; les volumes revendiqués par les attaquants ne sont pas toujours
-confirmés, et sont signalés comme tels.*
+confirmés et sont signalés comme tels.*
 
 [blf]: https://bonjourlafuite.eu.org/
