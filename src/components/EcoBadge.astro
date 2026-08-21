@@ -1,45 +1,138 @@
 ---
-// À importer et placer dans BaseFooter.astro : <EcoBadge />
+/**
+ * Mention d'écoconception affichée dans le footer.
+ *
+ * Le poids réel transféré est mesuré côté navigateur (Resource Timing),
+ * puis converti en estimation de CO₂ avec le facteur du modèle
+ * Sustainable Web Design (~0,494 g de CO₂e par Mo transféré).
+ *
+ * Le lien renvoie vers EcoIndex, qui calcule la note officielle de la
+ * page réellement consultée.
+ */
 ---
 
 <div
-  class="inline-flex items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500"
-  title="Temps de chargement de cette page — un site léger, hébergé statiquement."
+  class="flex flex-col items-center gap-1 text-xs text-neutral-400 dark:text-neutral-500"
 >
-  <svg
-    class="w-3.5 h-3.5 text-emerald-500 shrink-0"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M11 20A7 7 0 0 1 4 13c0-4 4-9 7-11 3 2 7 7 7 11a7 7 0 0 1-7 7Z"></path>
-    <path d="M11 20v-6"></path>
-  </svg>
-  <span id="eco-badge-text">calcul en cours…</span>
+  <p class="flex items-center gap-1.5">
+    <svg
+      class="w-3.5 h-3.5 shrink-0 text-emerald-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M11 20A7 7 0 0 1 4 13c0-4 4-9 7-11 3 2 7 7 7 11a7 7 0 0 1-7 7Z"
+      ></path>
+      <path d="M11 20v-6"></path>
+    </svg>
+
+    <span id="eco-badge-text"> Site statique, sans tracker ni publicité. </span>
+  </p>
+
+  <div class="flex items-center gap-2">
+    <a
+      id="eco-badge-link"
+      href="https://www.ecoindex.fr/"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="underline underline-offset-4 hover:text-neutral-900 dark:hover:text-neutral-100"
+    >
+      Mesurer la note écologique de cette page ↗
+    </a>
+
+    <!-- Précision sur ce que la note ne couvre pas. Pas de JavaScript : un
+         <details> suffit, et reste utilisable au clavier. -->
+    <details class="eco-note relative">
+      <summary
+        class="flex h-4 w-4 cursor-pointer list-none items-center justify-center rounded-full border border-neutral-300 text-[9px] leading-none transition-colors hover:border-neutral-500 hover:text-neutral-700 dark:border-neutral-700 dark:hover:border-neutral-500 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+        aria-label="Ce que cette note ne mesure pas"
+        title="Ce que cette note ne mesure pas"
+      >
+        i
+      </summary>
+
+      <div
+        class="absolute bottom-6 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-neutral-200 bg-white p-3 text-left text-xs leading-relaxed shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+      >
+        Cette note porte sur la page seule : son poids, ses requêtes, sa
+        complexité. Elle ne dit rien de l'infrastructure qui l'héberge —
+        datacenter, mix énergétique, fabrication et durée de vie des machines,
+        qui pèsent souvent plus lourd que la page elle-même.
+
+        <span class="mt-2 block text-neutral-400 dark:text-neutral-500">
+          À revoir le jour où ce site passera en auto-hébergement.
+        </span>
+      </div>
+    </details>
+  </div>
 </div>
 
 <script>
   window.addEventListener("load", () => {
-    const el = document.getElementById("eco-badge-text");
-    if (!el) return;
+    const text = document.getElementById("eco-badge-text");
+    const link = document.getElementById("eco-badge-link") as
+      | HTMLAnchorElement
+      | null;
+
+    // EcoIndex analyse l'URL publique : inutile de pointer vers localhost.
+    if (link && window.location.hostname !== "localhost") {
+      link.href = `https://bff.ecoindex.fr/redirect/?url=${encodeURIComponent(
+        window.location.href,
+      )}`;
+    }
+
+    if (!text) return;
 
     try {
-      const nav = performance.getEntriesByType("navigation")[0] as
+      const navigation = performance.getEntriesByType("navigation")[0] as
         | PerformanceNavigationTiming
         | undefined;
 
-      const loadMs = nav ? nav.loadEventEnd - nav.startTime : null;
+      const resources = performance.getEntriesByType(
+        "resource",
+      ) as PerformanceResourceTiming[];
 
-      el.textContent =
-        loadMs !== null && loadMs > 0
-          ? `Chargée en ${loadMs.toFixed(1)} ms`
-          : "Page statique et légère";
+      const bytes =
+        (navigation?.transferSize ?? 0) +
+        resources.reduce(
+          (total, resource) => total + (resource.transferSize ?? 0),
+          0,
+        );
+
+      if (bytes <= 0) return;
+
+      const kilobytes = bytes / 1024;
+
+      // Facteur Sustainable Web Design : 0,494 g CO₂e par Mo transféré.
+      const grams = (bytes / 1_048_576) * 0.494;
+
+      const size =
+        kilobytes >= 1024
+          ? `${(kilobytes / 1024).toFixed(2).replace(".", ",")} Mo`
+          : `${Math.round(kilobytes)} Ko`;
+
+      text.textContent = `Cette page pèse ${size} — environ ${grams
+        .toFixed(2)
+        .replace(".", ",")} g de CO₂e par visite.`;
     } catch {
-      el.textContent = "Page statique et légère";
+      /* On garde le texte statique par défaut. */
     }
   });
+
+  // Referme l'infobulle au clic à l'extérieur ou sur Échap.
+  const note = document.querySelector<HTMLDetailsElement>(".eco-note");
+
+  if (note) {
+    document.addEventListener("click", (event) => {
+      if (note.open && !note.contains(event.target as Node)) note.open = false;
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") note.open = false;
+    });
+  }
 </script>

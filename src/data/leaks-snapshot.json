@@ -1,0 +1,128 @@
+[
+  {
+    "organization": "Suez",
+    "date": "2026-08-20",
+    "status": "confirmed",
+    "data": [
+      "Nom, prénom",
+      "Numéro de téléphone",
+      "Adresse email",
+      "Documents administratifs",
+      "Carte d’identité",
+      "IBAN",
+      "Situation personnelle"
+    ],
+    "sensitive": true
+  },
+  {
+    "organization": "Alaxione",
+    "date": "2026-08-20",
+    "status": "confirmed",
+    "data": [
+      "Alaxione ment dans sa communication en soutenant qu’il s’agit exclusivement de données de test. Les propres données de l’administrateur de ce site sont dedans, avec un échange par email concernant une erreur de facturation que personne d’autre ne peut connaître."
+    ],
+    "sensitive": true,
+    "volume": "6.8 millions de patients"
+  },
+  {
+    "organization": "Institut de recherche pour le développement",
+    "date": "2026-08-19",
+    "status": "confirmed",
+    "data": [
+      "Nom, prénom",
+      "Genre",
+      "Date et lieu de naissance",
+      "Nationalité",
+      "Adresse postale",
+      "Numéro de téléphone",
+      "Matricule",
+      "Rattachement administratif",
+      "Affectation géographique",
+      "Statut, corps, grade, niveau, échelon",
+      "Emploi, discipline",
+      "Adresse email",
+      "Numéro de sécurité sociale"
+    ],
+    "sensitive": true,
+    "volume": "7 500 agents"
+  },
+  {
+    "organization": "Mutuelle Générale de Prévoyance",
+    "date": "2026-08-18",
+    "status": "confirmed",
+    "data": [
+      "Données d’identification et de contact",
+      "IBAN"
+    ],
+    "sensitive": true
+  },
+  {
+    "organization": "Direction générale des Finances publiques",
+    "date": "2026-08-18",
+    "status": "confirmed",
+    "data": [],
+    "sensitive": false
+  },
+  {
+    "organization": "Éducation Nationale",
+    "date": "2026-08-18",
+    "status": "claimed",
+    "data": [],
+    "sensitive": false,
+    "volume": "4.35 millions d’enseignants, 1.22 millions d’étudiants"
+  },
+  {
+    "organization": "SamBoat",
+    "date": "2026-08-16",
+    "status": "confirmed",
+    "data": [
+      "Nom, prénom",
+      "Date de naissance",
+      "Adresse email",
+      "Numéro de téléphone"
+    ],
+    "sensitive": false
+  },
+  {
+    "organization": "KparK",
+    "date": "2026-08-14",
+    "status": "confirmed",
+    "data": [
+      "Numéro de téléphone",
+      "Liste d’opposition Bloctel"
+    ],
+    "sensitive": false
+  },
+  {
+    "organization": "Santé publique France",
+    "date": "2026-08-13",
+    "status": "confirmed",
+    "data": [
+      "Adresse email",
+      "Adresse postale",
+      "Numéro de téléphone"
+    ],
+    "sensitive": false,
+    "volume": "80 000 personnes"
+  },
+  {
+    "organization": "France VAE",
+    "date": "2026-08-13",
+    "status": "confirmed",
+    "data": [
+      "Nom, prénoms",
+      "Genre",
+      "Adresse e-mail",
+      "Adresse postale",
+      "Département de résidence",
+      "Numéro de téléphone",
+      "Pays, ville et date de naissance",
+      "Nationalité",
+      "Certifications professionnelles",
+      "Qualifications et expériences",
+      "Résultats d’évaluation",
+      "Financement du parcours de VAE"
+    ],
+    "sensitive": false
+  }
+]

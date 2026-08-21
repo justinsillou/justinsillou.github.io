@@ -1,0 +1,118 @@
+---
+import Widget from "./Widget.astro";
+import {
+  getLatestLeaks,
+  LEAKS_SOURCE_NAME,
+  LEAKS_SOURCE_URL,
+} from "../../data/leaks";
+
+/**
+ * Raccourci « dernières fuites de données recensées en France ».
+ *
+ * Utilisable partout :
+ *
+ *   <LeaksWidget />                       plein format
+ *   <LeaksWidget limit={4} compact />     aperçu, sans les volumes
+ */
+
+type Props = {
+  limit?: number;
+  /** Version resserrée : une ligne par fuite, pas de volume. */
+  compact?: boolean;
+  title?: string;
+  /** Masquer le crédit de la source (si déjà cité à côté). */
+  hideNote?: boolean;
+  class?: string;
+};
+
+const {
+  limit = 8,
+  compact = false,
+  title = "Dernières fuites recensées",
+  hideNote = false,
+  class: className = "",
+} = Astro.props;
+
+const leaks = await getLatestLeaks(limit);
+
+const buildDate = new Date().toLocaleDateString("fr-FR", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "short",
+  });
+---
+
+{
+  leaks.length > 0 && (
+    <Widget
+      title={title}
+      meta={`relevé le ${buildDate}`}
+      href="/blog/fuites-de-donnees-france"
+      linkLabel="l'article"
+      class={className}
+    >
+      <ul class="divide-y divide-neutral-100 dark:divide-neutral-900">
+        {leaks.map((leak) => (
+          <li class="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-2.5 first:pt-0 last:pb-0">
+            <time
+              datetime={leak.date}
+              class="cv-mono w-16 shrink-0 text-xs text-neutral-400 dark:text-neutral-500"
+            >
+              {formatDate(leak.date)}
+            </time>
+
+            <span class="min-w-0 flex-1 text-sm text-neutral-900 dark:text-neutral-100">
+              {leak.organization}
+
+              {leak.status === "claimed" && (
+                <span
+                  class="cv-mono ml-2 text-[10px] text-amber-600 dark:text-amber-500"
+                  title="Fuite revendiquée, pas encore confirmée par l'organisme"
+                >
+                  revendiqué
+                </span>
+              )}
+
+              {leak.sensitive && !compact && (
+                <span
+                  class="cv-mono ml-2 text-[10px] text-neutral-400 dark:text-neutral-500"
+                  title="Données sensibles au sens de l'article 9 du RGPD"
+                >
+                  sensible
+                </span>
+              )}
+            </span>
+
+            {!compact && leak.volume && (
+              <span class="cv-mono shrink-0 text-xs text-neutral-500 dark:text-neutral-400">
+                {leak.volume}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {!hideNote && (
+        <p slot="note">
+          Source :{" "}
+          <a
+            href={LEAKS_SOURCE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-4 hover:text-neutral-900 dark:hover:text-neutral-100"
+          >
+            {LEAKS_SOURCE_NAME}
+          </a>
+          , projet libre sous licence MIT. Flux lu à la génération du site :
+          aucune requête depuis votre navigateur.
+        </p>
+      )}
+    </Widget>
+  )
+}

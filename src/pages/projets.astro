@@ -1,9 +1,227 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { projectsByDate, projectCategories } from "../data/projects";
 ---
 
-<BaseLayout>
-  <div class="flex items-center justify-center">
-    <h1 class="text-4xl font-bold">Page en construction</h1>
+<BaseLayout title="Projets — Justin Sillou" fullWidth>
+  <div
+    class="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-14 sm:py-20 lg:py-28"
+  >
+    <header class="mb-14 sm:mb-16 lg:mb-24 max-w-3xl">
+      <h1
+        class="text-4xl sm:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100"
+      >
+        Projets
+      </h1>
+
+      <p
+        class="mt-3 sm:mt-4 text-base sm:text-lg text-neutral-500 dark:text-neutral-400"
+      >
+        Projets personnels et universitaires. Le travail réalisé en entreprise
+        est détaillé sur la <a
+          href="/cv"
+          class="underline underline-offset-4 hover:text-neutral-900 dark:hover:text-neutral-100"
+          >page CV</a
+        >.
+      </p>
+    </header>
+
+    <div
+      class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-12 lg:gap-24"
+    >
+      <!-- Colonne principale -->
+      <div class="min-w-0 lg:order-1 order-2">
+        <ul
+          id="projects-list"
+          class="divide-y divide-neutral-200 dark:divide-neutral-800"
+        >
+          {
+            projectsByDate.map((project) => (
+              <li class="project-item" data-category={project.category}>
+                <details class="group py-7 sm:py-8">
+                  <summary class="flex cursor-pointer list-none items-baseline gap-6 sm:gap-8 [&::-webkit-details-marker]:hidden">
+                    <span class="min-w-0 flex-1">
+                      <span class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                        <span class="text-base sm:text-lg lg:text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+                          {project.title}
+                        </span>
+
+                        {project.status === "en-cours" && (
+                          <span class="cv-mono text-[10px] uppercase text-emerald-600 dark:text-emerald-400">
+                            en cours
+                          </span>
+                        )}
+                      </span>
+
+                      <span class="mt-2 block max-w-2xl text-sm sm:text-base leading-relaxed text-neutral-500 dark:text-neutral-400">
+                        {project.summary}
+                      </span>
+                    </span>
+
+                    <span class="cv-mono shrink-0 text-xs sm:text-sm text-neutral-400 dark:text-neutral-500">
+                      {project.sortKey}
+                    </span>
+
+                    <span
+                      class="shrink-0 text-neutral-300 transition-transform duration-200 group-open:rotate-45 dark:text-neutral-700"
+                      aria-hidden="true"
+                    >
+                      +
+                    </span>
+                  </summary>
+
+                  <div class="mt-6 sm:pl-1">
+                    {project.details && (
+                      <p class="max-w-3xl text-sm sm:text-base leading-relaxed text-neutral-600 dark:text-neutral-300">
+                        {project.details}
+                      </p>
+                    )}
+
+                    <p class="mt-5 cv-mono text-xs text-neutral-400 dark:text-neutral-500">
+                      {project.context} · {project.period}
+                    </p>
+
+                    <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                      {project.tags.map((tag) => (
+                        <span class="cv-mono text-xs text-neutral-500 dark:text-neutral-400">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {project.links && (
+                      <div class="mt-5 flex flex-wrap gap-5">
+                        {project.links.map((link) => (
+                          <a
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="cv-mono text-xs underline underline-offset-4 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                          >
+                            {link.label} ↗
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </details>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p
+          id="projects-empty"
+          class="hidden py-10 text-sm text-neutral-400 dark:text-neutral-500"
+        >
+          Aucun projet avec ce filtre.
+        </p>
+      </div>
+
+      <!-- Filtres -->
+      <aside class="lg:order-2 order-1 lg:sticky lg:top-24 lg:self-start">
+        <h2
+          class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+        >
+          Filtrer
+        </h2>
+
+        <div
+          class="flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label="Filtrer les projets"
+        >
+          <button
+            type="button"
+            data-filter="all"
+            aria-pressed="true"
+            class="filter-btn cv-mono text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 transition-colors"
+          >
+            tous
+          </button>
+
+          {
+            projectCategories.map((category) => (
+              <button
+                type="button"
+                data-filter={category}
+                aria-pressed="false"
+                class="filter-btn cv-mono text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 transition-colors"
+              >
+                {category.toLowerCase()}
+              </button>
+            ))
+          }
+        </div>
+
+        <p
+          id="projects-count"
+          class="mt-5 cv-mono text-xs text-neutral-400 dark:text-neutral-500"
+          aria-live="polite"
+        >
+          {projectsByDate.length} projets
+        </p>
+      </aside>
+    </div>
   </div>
 </BaseLayout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+  const items = document.querySelectorAll<HTMLLIElement>(".project-item");
+  const count = document.getElementById("projects-count");
+  const empty = document.getElementById("projects-empty");
+
+  const ACTIVE = [
+    "bg-neutral-900",
+    "dark:bg-neutral-100",
+    "text-white",
+    "dark:text-neutral-900",
+    "border-neutral-900",
+    "dark:border-neutral-100",
+  ];
+
+  const applyFilter = (filter: string) => {
+    let visible = 0;
+
+    items.forEach((item) => {
+      const match = filter === "all" || item.dataset.category === filter;
+
+      item.classList.toggle("hidden", !match);
+
+      if (match) visible += 1;
+      else item.querySelector("details")?.removeAttribute("open");
+    });
+
+    buttons.forEach((button) => {
+      const isActive = button.dataset.filter === filter;
+      button.setAttribute("aria-pressed", String(isActive));
+      ACTIVE.forEach((cls) => button.classList.toggle(cls, isActive));
+    });
+
+    if (count) {
+      count.textContent = `${visible} projet${visible > 1 ? "s" : ""}`;
+    }
+
+    empty?.classList.toggle("hidden", visible > 0);
+
+    const url = new URL(window.location.href);
+
+    if (filter === "all") url.searchParams.delete("filtre");
+    else url.searchParams.set("filtre", filter);
+
+    history.replaceState(null, "", url);
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      applyFilter(button.dataset.filter ?? "all");
+    });
+  });
+
+  // Filtre initial : ?filtre=Mobile permet de partager une vue filtrée.
+  const initial = new URL(window.location.href).searchParams.get("filtre");
+  const known = [...buttons].some((button) => button.dataset.filter === initial);
+
+  applyFilter(known && initial ? initial : "all");
+</script>

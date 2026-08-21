@@ -1,13 +1,14 @@
 ---
-import { changelog } from "../content/changelog";
+import { changelog } from "../data/changelog";
+import EcoBadge from "./EcoBadge.astro";
 //import ReadingSizeToggle from "./ReadingSizeToggle.astro";
-//import EcoBadge from "./EcoBadge.astro";
 
 const latest = changelog[0];
+const year = new Date().getFullYear();
 ---
 
 <footer
-  class="shrink-0 max-w-md mx-auto mb-8 flex flex-col items-center gap-4 text-center text-xs text-neutral-400"
+  class="shrink-0 max-w-md mx-auto mb-8 mt-20 flex flex-col items-center gap-4 px-6 text-center text-xs text-neutral-400"
 >
   <a
     href="/changelog"
@@ -16,8 +17,13 @@ const latest = changelog[0];
     Dernière mise à jour : {latest.date} — v{latest.version}
   </a>
 
+  <EcoBadge />
+
   <div class="flex flex-wrap items-center justify-center gap-4">
     {/* <ReadingSizeToggle /> */}
-    {/* <EcoBadge /> */}
   </div>
+
+  <p class="text-neutral-300 dark:text-neutral-700">
+    © {year} Justin Sillou
+  </p>
 </footer>

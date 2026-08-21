@@ -2,3 +2,243 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+  }
+
+  /* Ancre de scroll sous le header flottant. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+}
+
+/* Police monospace, utilisée pour les métadonnées et le terminal. */
+.cv-mono {
+  font-family: var(--font-mono);
+}
+
+/**
+ * Mise en forme du Markdown des articles.
+ * Volontairement minimale : pas de plugin typography, juste ce qui sert.
+ */
+.prose-simple {
+  color: var(--color-neutral-700);
+  line-height: 1.75;
+}
+
+.dark .prose-simple {
+  color: var(--color-neutral-300);
+}
+
+.prose-simple > * + * {
+  margin-top: 1.25em;
+}
+
+.prose-simple h2 {
+  margin-top: 2.75em;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--color-neutral-900);
+}
+
+.prose-simple h3 {
+  margin-top: 2em;
+  font-size: 1.05rem;
+  color: var(--color-neutral-900);
+}
+
+.dark .prose-simple :is(h2, h3) {
+  color: var(--color-neutral-100);
+}
+
+.prose-simple strong {
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.dark .prose-simple strong {
+  color: var(--color-neutral-100);
+}
+
+.prose-simple a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--color-neutral-300);
+}
+
+.prose-simple a:hover {
+  text-decoration-color: currentColor;
+}
+
+.prose-simple :is(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.prose-simple ul {
+  list-style: disc;
+}
+
+.prose-simple ol {
+  list-style: decimal;
+}
+
+.prose-simple li::marker {
+  color: var(--color-neutral-300);
+}
+
+.dark .prose-simple li::marker {
+  color: var(--color-neutral-700);
+}
+
+.prose-simple li + li {
+  margin-top: 0.5em;
+}
+
+.prose-simple blockquote {
+  border-left: 1px solid var(--color-neutral-200);
+  padding-left: 1rem;
+  color: var(--color-neutral-500);
+}
+
+.prose-simple code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--color-neutral-100);
+  padding: 0.125em 0.375em;
+  border-radius: 0.25rem;
+}
+
+.dark .prose-simple code {
+  background: var(--color-neutral-900);
+}
+
+.prose-simple pre {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.dark .prose-simple pre {
+  border-color: var(--color-neutral-800);
+}
+
+.prose-simple pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Coloration syntaxique : Shiki expose un jeu de variables par thème.
+   Un seul sélecteur par règle, et `:is()` pour couvrir le bloc et ses jetons :
+   avec deux sélecteurs séparés par une virgule, le minifieur fusionne les deux
+   règles et le thème clair se retrouve colorié en sombre. */
+.prose-simple :is(pre, pre span) {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+.dark .prose-simple :is(pre, pre span) {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
+.prose-simple hr {
+  margin-block: 3em;
+  border-color: var(--color-neutral-200);
+}
+
+.dark .prose-simple :is(hr, blockquote) {
+  border-color: var(--color-neutral-800);
+}
+
+.prose-simple em {
+  color: var(--color-neutral-500);
+}
+
+/**
+ * Barre de progression de lecture.
+ *
+ * Animation pilotée par le défilement : aucun JavaScript, aucun écouteur
+ * d'événement. Sans le support de `animation-timeline`, la barre reste à
+ * l'échelle 0, donc invisible — elle ne dégrade rien.
+ */
+.reading-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: 2px;
+  background: var(--color-neutral-900);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.dark .reading-progress {
+  background: var(--color-neutral-100);
+}
+
+@supports (animation-timeline: scroll()) {
+  @keyframes reading-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .reading-progress {
+    animation-name: reading-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+
+  /* Dans une règle séparée : regroupé avec les autres propriétés, le
+     minifieur produit un raccourci `animation` contenant la timeline, que
+     les navigateurs rejettent — l'animation est alors ignorée. */
+  .reading-progress[class] {
+    animation-timeline: scroll(root block);
+  }
+}
+
+/* Lien actif du sommaire, posé par l'observateur d'intersection. */
+.toc-link-active {
+  color: var(--color-neutral-900);
+}
+
+.dark .toc-link-active {
+  color: var(--color-neutral-100);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reading-progress {
+    display: none;
+  }
+}
+
+/**
+ * nitsuj — le site à l'envers.
+ *
+ * Le `transform` porte sur `body` : les éléments fixes en héritent, tout part
+ * du même côté. Se désactive en retapant la commande dans la recherche.
+ */
+.miroir body {
+  transform: scaleX(-1);
+}

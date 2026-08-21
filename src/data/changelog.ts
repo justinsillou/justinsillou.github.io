@@ -1,0 +1,93 @@
+export const changelog = [
+    {
+        version: "1.0.0",
+        date: "22/08/2026",
+        title: "Du contenu, enfin",
+        changes: [
+            "Page Projets : liste filtrable par technologie, fiches dépliables",
+            "Page Now : ce que je fais en ce moment, avec indicateur de fraîcheur",
+            "Blog : collection Markdown, filtres par thème, sommaire et sources",
+            "Premier article : les fuites de données en France",
+            "Terminal simplifié : palette de commandes (Ctrl + K), fin de la fausse fenêtre macOS",
+            "Footer : mention d'écoconception, poids réel de la page et lien vers EcoIndex",
+            "Polices DM Sans et JetBrains Mono réellement chargées",
+            "Métadonnées : description, canonical, Open Graph, et fin du noindex global",
+            "Accueil et page 404 remis à jour",
+            "Mise en page élargie sur tout le site, alignée sur celle du CV",
+            "Colonne latérale : filtres sur Projets et Blog, sommaire sur les articles",
+            "Typographie : suppression des espacements de lettres",
+            "Article sur les fuites de données réécrit sur l'actualité de l'été 2026",
+            "Bloc « dernières fuites recensées » alimenté au build par le flux libre de bonjourlafuite.eu.org",
+            "Reconstruction quotidienne du site pour rafraîchir ces données",
+            "Ctrl + K cherche aussi dans les articles du blog, accents ignorés",
+            "Raccourcis réutilisables : un cadre commun, posable sur n'importe quelle page",
+            "Aperçu des dernières fuites sur la page d'accueil",
+            "Coloration syntaxique adaptée au thème clair comme au thème sombre",
+            "Accueil restructuré en deux colonnes, avec une colonne de raccourcis",
+            "Raccourci « à la une » : mise en avant manuelle, éditable dans un fichier",
+            "Ajout du projet Villa Henrande",
+            "Flux RSS du blog",
+            "Sommaire actif pendant la lecture, barre de progression sans JavaScript",
+            "Navigation entre articles et bouton de partage sans service tiers",
+            "Plan du site et robots.txt",
+            "Note écologique : précision sur ce que le score ne mesure pas",
+            "Bouton d'accueil : icône maison plutôt que flèche de retour",
+            "Recherche accessible depuis le header, et disponible sur mobile",
+            "nitsuj",
+            "Vérification du typage avant chaque déploiement",
+        ],
+    },
+    {
+        version: "0.9.4",
+        date: "19/08/2026",
+        title: "Ajout de la page de CV",
+        changes: [
+            "Ajout d'une page de CV",
+            "Modification du menu",
+            "Édition du footer [WIP]",
+            "Modification de la page 404",
+            "Préparation de la page projet + Lien avec la page CV",
+            "Réflexion sur l'i18n",
+            "Ajout d'un terminal interactif",
+            "Ajout de commandes pour naviguer dans le site"
+        ],
+    },
+    {
+        version: "0.9.3",
+        date: "18/08/2026",
+        title: "Ajout d'un menu burger [WIP]",
+        changes: [
+            "Ajout d'un menu burger",
+            "Création des idées de page CV, Blog, ...",
+            "↑ ↑ ↓ ↓ ← → ← → B A"
+        ],
+    },
+    {
+        version: "0.9.2",
+        date: "14/07/2026",
+        title: "Ça se précise !",
+        changes: [
+            "Nouveau design sobre avec mode clair/sombre",
+            "Ajout d'une page de changelog",
+            "Passage à Tailwind",
+            "Page 404",
+            "Pas encore de contenu, mais ça va venir !",
+        ],
+    },
+    {
+        version: "0.9.1",
+        date: "08/06/2026",
+        title: "En cours de développement",
+        changes: [
+            "Les idées cogitent, mais le site est encore en construction. Il n'y a pas grand chose à voir pour le moment.",
+        ],
+    },
+    {
+        version: "0.9.0",
+        date: "01/04/2026",
+        title: "Il est temps de se refaire une beauté",
+        changes: [
+            "Non ce n'était pas une blague du 1er Avril, il a été convenu de repartir de 0. Dans le but de créer un site plus simple et plus rapide",
+        ]
+    },
+];

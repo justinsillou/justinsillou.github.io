@@ -1,7 +1,7 @@
 ---
 const pathname = Astro.url.pathname;
 
-const showBackButton = pathname !== "/" && pathname !== "/404";
+const showHomeButton = pathname !== "/" && pathname !== "/404";
 
 const menuItems = [
   { label: "Now", href: "/now" },
@@ -12,12 +12,13 @@ const menuItems = [
 ---
 
 <header>
-  <!-- Retour -->
+  <!-- Accueil -->
   {
-    showBackButton && (
+    showHomeButton && (
       <a
         href="/"
-        aria-label="Retour à l'accueil"
+        aria-label="Aller à l'accueil"
+        title="Accueil"
         class="fixed top-4 left-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
       >
         <svg
@@ -30,7 +31,8 @@ const menuItems = [
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <path d="m15 18-6-6 6-6"></path>
+          <path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <path d="M9 21v-8h6v8"></path>
         </svg>
       </a>
     )
@@ -93,6 +95,29 @@ const menuItems = [
       >
         <path d="M6 6l12 12"></path>
         <path d="M18 6l-12 12"></path>
+      </svg>
+    </button>
+
+    <!-- Recherche -->
+    <button
+      id="search-toggle"
+      type="button"
+      aria-label="Rechercher dans le site (Ctrl + K)"
+      title="Rechercher (Ctrl + K)"
+      class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+    >
+      <svg
+        class="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
       </svg>
     </button>
 
@@ -159,6 +184,12 @@ const menuItems = [
 </header>
 
 <script>
+  // La palette de recherche vit dans une île React : on la réveille par un
+  // évènement plutôt que de dupliquer son état ici.
+  document.getElementById("search-toggle")?.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("open-search"));
+  });
+
   const menuToggle = document.getElementById("menu-toggle");
   const siteMenu = document.getElementById("site-menu");
   const menuIcon = document.getElementById("menu-icon");

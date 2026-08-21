@@ -1,0 +1,65 @@
+---
+/**
+ * Bouton de partage.
+ *
+ * Pas de widget tiers, donc pas de tracker : on utilise le partage natif du
+ * navigateur quand il existe (mobile surtout), et une copie du lien dans le
+ * presse-papiers sinon. Aucune requête réseau dans les deux cas.
+ */
+
+type Props = {
+  title: string;
+  class?: string;
+};
+
+const { title, class: className = "" } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={[
+    "share-button cv-mono text-xs text-neutral-400 underline underline-offset-4 transition-colors hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-100",
+    className,
+  ]}
+  data-title={title}
+  data-label="partager"
+>
+  partager
+</button>
+
+<script>
+  document
+    .querySelectorAll<HTMLButtonElement>(".share-button")
+    .forEach((button) => {
+      const label = button.dataset.label ?? "partager";
+
+      const flash = (text: string) => {
+        button.textContent = text;
+        window.setTimeout(() => {
+          button.textContent = label;
+        }, 2000);
+      };
+
+      button.addEventListener("click", async () => {
+        const url = window.location.href;
+        const title = button.dataset.title ?? document.title;
+
+        if (navigator.share) {
+          try {
+            await navigator.share({ title, url });
+            return;
+          } catch {
+            // Partage annulé par l'utilisateur : on ne fait rien de plus.
+            return;
+          }
+        }
+
+        try {
+          await navigator.clipboard.writeText(url);
+          flash("lien copié");
+        } catch {
+          flash("copie impossible");
+        }
+      });
+    });
+</script>

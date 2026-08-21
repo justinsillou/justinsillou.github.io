@@ -1,0 +1,285 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import LeaksWidget from "../../components/widgets/LeaksWidget.astro";
+import ShareButton from "../../components/ShareButton.astro";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  );
+
+  return posts.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      // Les articles sont triés du plus récent au plus ancien : le suivant
+      // dans le tableau est donc le précédent dans le temps.
+      older: posts[index + 1],
+      newer: posts[index - 1],
+    },
+  }));
+};
+
+type Props = {
+  post: CollectionEntry<"blog">;
+  older?: CollectionEntry<"blog">;
+  newer?: CollectionEntry<"blog">;
+};
+
+const { post, older, newer } = Astro.props as Props;
+const { Content, headings } = await render(post);
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+const readingTime = Math.max(
+  1,
+  Math.round((post.body ?? "").trim().split(/\s+/).length / 200),
+);
+
+// Seuls les h2 alimentent le sommaire : suffisant, et ça reste lisible.
+const toc = headings.filter((heading) => heading.depth === 2);
+
+const AI_LABELS: Record<string, string> = {
+  none: "Écrit sans outil d'IA.",
+  research: "Recherche documentaire assistée par IA, rédaction humaine.",
+  editing: "Rédaction humaine, relecture assistée par IA.",
+  drafting:
+    "Première version rédigée avec une IA, reprise et vérifiée à la main.",
+};
+---
+
+<BaseLayout
+  title={`${post.data.title} — Justin Sillou`}
+  description={post.data.description}
+  fullWidth
+>
+  <!-- Progression de lecture : animation pilotée par le scroll, sans JS. -->
+  <div class="reading-progress" aria-hidden="true"></div>
+
+  <div
+    class="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-14 sm:py-20 lg:py-28"
+  >
+    <header class="mb-12 sm:mb-14 lg:mb-20 max-w-4xl">
+      <a
+        href="/blog"
+        class="cv-mono text-xs text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-100"
+      >
+        ← blog
+      </a>
+
+      <h1
+        class="mt-8 text-3xl sm:text-4xl lg:text-5xl leading-tight text-neutral-900 dark:text-neutral-100"
+      >
+        {post.data.title}
+      </h1>
+
+      <p
+        class="mt-4 sm:mt-5 max-w-3xl text-base sm:text-lg leading-relaxed text-neutral-500 dark:text-neutral-400"
+      >
+        {post.data.description}
+      </p>
+
+      <div
+        class="mt-6 flex max-w-3xl flex-wrap items-center gap-x-3 gap-y-2 cv-mono text-xs text-neutral-400 dark:text-neutral-500"
+      >
+        <time datetime={post.data.pubDate.toISOString()}>
+          {formatDate(post.data.pubDate)}
+        </time>
+
+        <span aria-hidden="true">·</span>
+
+        <span>{readingTime} min de lecture</span>
+
+        {
+          post.data.tags.map((tag) => (
+            <span class="text-neutral-300 dark:text-neutral-700">
+              #{tag.toLowerCase()}
+            </span>
+          ))
+        }
+
+        <ShareButton title={post.data.title} class="ml-auto" />
+      </div>
+
+      {
+        post.data.updatedDate && (
+          <p class="mt-3 cv-mono text-xs text-emerald-600 dark:text-emerald-400">
+            Mis à jour le {formatDate(post.data.updatedDate)}
+          </p>
+        )
+      }
+    </header>
+
+    <div
+      class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-12 lg:gap-24"
+    >
+      <!-- Article -->
+      <div class="min-w-0 max-w-3xl lg:order-1 order-2">
+        <article class="prose-simple">
+          <Content />
+        </article>
+
+        {post.data.widget === "leaks" && <LeaksWidget class="mt-14" />}
+
+        {
+          post.data.ai && (
+            <p class="mt-10 cv-mono text-xs text-neutral-400 dark:text-neutral-500">
+              {AI_LABELS[post.data.ai]}
+            </p>
+          )
+        }
+
+        <!-- Article précédent / suivant -->
+        {
+          (older || newer) && (
+            <nav
+              aria-label="Autres articles"
+              class="mt-14 grid grid-cols-1 gap-6 border-t border-neutral-200 pt-8 sm:grid-cols-2 dark:border-neutral-800"
+            >
+              {newer ? (
+                <a href={`/blog/${newer.id}`} class="group">
+                  <span class="cv-mono text-xs text-neutral-400 dark:text-neutral-500">
+                    ← plus récent
+                  </span>
+
+                  <span class="mt-2 block text-sm text-neutral-900 underline-offset-4 group-hover:underline dark:text-neutral-100">
+                    {newer.data.title}
+                  </span>
+                </a>
+              ) : (
+                <span />
+              )}
+
+              {older && (
+                <a href={`/blog/${older.id}`} class="group sm:text-right">
+                  <span class="cv-mono text-xs text-neutral-400 dark:text-neutral-500">
+                    plus ancien →
+                  </span>
+
+                  <span class="mt-2 block text-sm text-neutral-900 underline-offset-4 group-hover:underline dark:text-neutral-100">
+                    {older.data.title}
+                  </span>
+                </a>
+              )}
+            </nav>
+          )
+        }
+      </div>
+
+      <!-- Sommaire et sources -->
+      <aside
+        class="lg:order-2 order-1 lg:sticky lg:top-24 lg:self-start space-y-10"
+      >
+        {
+          toc.length > 1 && (
+            <nav aria-label="Sommaire">
+              <h2 class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-4">
+                Sommaire
+              </h2>
+
+              <ol class="space-y-3 text-sm">
+                {toc.map((heading, index) => (
+                  <li class="flex gap-3">
+                    <span class="cv-mono shrink-0 text-neutral-300 dark:text-neutral-700">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <a
+                      href={`#${heading.slug}`}
+                      class="toc-link text-neutral-600 underline-offset-4 hover:text-neutral-900 hover:underline dark:text-neutral-300 dark:hover:text-neutral-100"
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+
+        {
+          post.data.sources.length > 0 && (
+            <section>
+              <h2 class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-4">
+                Sources
+              </h2>
+
+              <ul class="space-y-3 text-sm">
+                {post.data.sources.map((source) => (
+                  <li>
+                    <a
+                      href={source.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-neutral-600 underline underline-offset-4 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                    >
+                      {source.label} ↗
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Sommaire actif : surligne la section en cours de lecture.
+  //
+  // Calcul par position plutôt qu'IntersectionObserver : avec un observateur,
+  // rien n'est actif entre deux titres, puisqu'aucun ne traverse la zone
+  // observée. Ici, la section active est toujours la dernière franchie.
+  const links = document.querySelectorAll<HTMLAnchorElement>(".toc-link");
+
+  if (links.length > 0) {
+    const entries = [...links]
+      .map((link) => ({
+        link,
+        heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
+      }))
+      .filter(
+        (entry): entry is { link: HTMLAnchorElement; heading: HTMLElement } =>
+          entry.heading !== null,
+      );
+
+    // Hauteur du header flottant : un titre est « franchi » un peu avant
+    // d'atteindre le haut de la fenêtre.
+    const OFFSET = 120;
+
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+
+      let active = -1;
+
+      entries.forEach((entry, index) => {
+        if (entry.heading.getBoundingClientRect().top <= OFFSET) active = index;
+      });
+
+      entries.forEach((entry, index) => {
+        entry.link.classList.toggle("toc-link-active", index === active);
+      });
+    };
+
+    const schedule = () => {
+      if (frame === 0) frame = requestAnimationFrame(update);
+    };
+
+    addEventListener("scroll", schedule, { passive: true });
+    addEventListener("resize", schedule, { passive: true });
+
+    update();
+  }
+</script>

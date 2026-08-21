@@ -1,0 +1,74 @@
+---
+/**
+ * Coquille commune à tous les raccourcis.
+ *
+ * Ne s'occupe que du cadre : titre, méta, lien « tout voir », contenu.
+ * Le contenu arrive par les slots, donc n'importe quel bloc peut devenir un
+ * raccourci sans dupliquer cette mise en forme.
+ *
+ *   <Widget title="Dernières fuites" href="/blog/…" meta="relevé le 21 août">
+ *     …
+ *     <p slot="note">Source : …</p>
+ *   </Widget>
+ */
+
+type Props = {
+  title: string;
+  /** Lien « tout voir » affiché en haut à droite. */
+  href?: string;
+  linkLabel?: string;
+  /** Petite info sous le titre (date de relevé, compteur…). */
+  meta?: string;
+  class?: string;
+};
+
+const {
+  title,
+  href,
+  linkLabel = "tout voir",
+  meta,
+  class: className = "",
+} = Astro.props;
+---
+
+<section
+  class:list={[
+    "rounded-lg border border-neutral-200 p-5 sm:p-6 dark:border-neutral-800",
+    className,
+  ]}
+>
+  <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+    <h2 class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+      {title}
+    </h2>
+
+    {
+      href && (
+        <a
+          href={href}
+          class="cv-mono text-xs text-neutral-400 underline underline-offset-4 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-100"
+        >
+          {linkLabel}
+        </a>
+      )
+    }
+  </div>
+
+  {
+    meta && (
+      <p class="mt-1 cv-mono text-xs text-neutral-400 dark:text-neutral-500">
+        {meta}
+      </p>
+    )
+  }
+
+  <div class="mt-4">
+    <slot />
+  </div>
+
+  <div
+    class="empty:hidden mt-4 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500"
+  >
+    <slot name="note" />
+  </div>
+</section>

@@ -9,6 +9,16 @@ on:
   push:
     branches: ["main"]
 
+  # Reconstruction quotidienne : le bloc « dernières fuites » est alimenté par
+  # un flux externe lu au build, il ne se rafraîchit donc qu'au déploiement.
+  #
+  # 04:17 UTC, soit 06:17 à Paris en heure d'été (05:17 en hiver). La minute
+  # n'est pas ronde volontairement : GitHub exécute les crons sur une file
+  # partagée, et les heures pile sont les plus encombrées — un décalage de
+  # quelques minutes réduit nettement les retards et les exécutions sautées.
+  schedule:
+    - cron: "17 4 * * *"
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -65,6 +75,9 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        working-directory: ${{ env.BUILD_PATH }}
+      - name: Type check
+        run: ${{ steps.detect-package-manager.outputs.runner }} astro check
         working-directory: ${{ env.BUILD_PATH }}
       - name: Build with Astro
         run: |
