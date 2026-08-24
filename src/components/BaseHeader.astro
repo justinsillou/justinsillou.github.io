@@ -1,14 +1,38 @@
 ---
-const pathname = Astro.url.pathname;
+import FlagIcon from "./FlagIcon.astro";
 
-const showHomeButton = pathname !== "/" && pathname !== "/404";
+import {
+  getLangFromUrl,
+  languages,
+  localizePath,
+  stripLang,
+  useTranslations,
+  type Lang,
+} from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const pathname = Astro.url.pathname;
+const bare = stripLang(pathname);
+
+// Comparaisons sans slash final : `/404` et `/404/` désignent la même page.
+const route = bare.replace(/\/$/, "") || "/";
+
+const showHomeButton = route !== "/" && route !== "/404";
 
 const menuItems = [
-  { label: "Now", href: "/now" },
-  { label: "Projets", href: "/projets" },
-  { label: "Blog", href: "/blog" },
-  { label: "CV", href: "/cv" },
+  { label: t("nav.now"), href: localizePath(lang, "/now") },
+  { label: t("nav.projects"), href: localizePath(lang, "/projets") },
+  { label: t("nav.blog"), href: localizePath(lang, "/blog") },
+  { label: t("nav.cv"), href: localizePath(lang, "/cv") },
 ];
+
+// Sélecteur de langue : même page, autre langue.
+// La 404 fait exception : elle n'existe qu'une fois, on renvoie à l'accueil.
+const otherLang: Lang = lang === "fr" ? "en" : "fr";
+
+const otherLangHref = localizePath(otherLang, route === "/404" ? "/" : bare);
 ---
 
 <header>
@@ -16,9 +40,9 @@ const menuItems = [
   {
     showHomeButton && (
       <a
-        href="/"
-        aria-label="Aller à l'accueil"
-        title="Accueil"
+        href={localizePath(lang, "/")}
+        aria-label={t("nav.homeAria")}
+        title={t("nav.homeTitle")}
         class="fixed top-4 left-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
       >
         <svg
@@ -31,8 +55,8 @@ const menuItems = [
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <path d="M9 21v-8h6v8"></path>
+          <path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <path d="M9 21v-8h6v8" />
         </svg>
       </a>
     )
@@ -42,7 +66,7 @@ const menuItems = [
   <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
     <!-- Liens de navigation : desktop uniquement -->
     <nav
-      aria-label="Navigation principale"
+      aria-label={t("nav.main")}
       class="hidden md:flex items-center gap-1 mr-1 px-1.5 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur"
     >
       {
@@ -61,9 +85,11 @@ const menuItems = [
     <button
       id="menu-toggle"
       type="button"
-      aria-label="Ouvrir le menu"
+      aria-label={t("nav.openMenu")}
       aria-expanded="false"
       aria-controls="site-menu"
+      data-label-open={t("nav.openMenu")}
+      data-label-close={t("nav.closeMenu")}
       class="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
     >
       <!-- Menu -->
@@ -98,12 +124,25 @@ const menuItems = [
       </svg>
     </button>
 
+    <!-- Langue -->
+    <a
+      href={otherLangHref}
+      hreflang={otherLang}
+      aria-label={t("nav.languageTo")}
+      title={languages[otherLang]}
+      class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+    >
+      <FlagIcon lang={otherLang} />
+
+      <span class="sr-only">{languages[otherLang]}</span>
+    </a>
+
     <!-- Recherche -->
     <button
       id="search-toggle"
       type="button"
-      aria-label="Rechercher dans le site (Ctrl + K)"
-      title="Rechercher (Ctrl + K)"
+      aria-label={t("nav.search")}
+      title={t("nav.searchTitle")}
       class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
     >
       <svg
@@ -116,8 +155,8 @@ const menuItems = [
         stroke-linejoin="round"
         aria-hidden="true"
       >
-        <circle cx="11" cy="11" r="7" />
-        <path d="m20 20-3.5-3.5" />
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m20 20-3.5-3.5"></path>
       </svg>
     </button>
 
@@ -125,7 +164,7 @@ const menuItems = [
     <button
       id="theme-toggle"
       type="button"
-      aria-label="Changer de thème"
+      aria-label={t("nav.theme")}
       class="w-9 h-9 flex items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
     >
       <!-- Lune -->
@@ -160,7 +199,7 @@ const menuItems = [
   <!-- Menu flottant en bulle : tablette / mobile uniquement -->
   <nav
     id="site-menu"
-    aria-label="Navigation principale (mobile)"
+    aria-label={t("nav.mainMobile")}
     aria-hidden="true"
     class="md:hidden fixed top-16 right-4 z-40 w-48 origin-top-right opacity-0 scale-95 pointer-events-none transition-all duration-150"
   >
@@ -195,16 +234,17 @@ const menuItems = [
   const menuIcon = document.getElementById("menu-icon");
   const closeIcon = document.getElementById("close-icon");
 
+  // Les libellés viennent du serveur : ce script n'a pas à connaître la langue.
+  const labelOpen = menuToggle?.dataset.labelOpen ?? "";
+  const labelClose = menuToggle?.dataset.labelClose ?? "";
+
   let menuOpen = false;
 
   const setMenuState = (open: boolean) => {
     menuOpen = open;
 
     menuToggle?.setAttribute("aria-expanded", String(open));
-    menuToggle?.setAttribute(
-      "aria-label",
-      open ? "Fermer le menu" : "Ouvrir le menu"
-    );
+    menuToggle?.setAttribute("aria-label", open ? labelClose : labelOpen);
 
     siteMenu?.setAttribute("aria-hidden", String(!open));
 
@@ -228,10 +268,7 @@ const menuItems = [
 
     const target = event.target as Node;
 
-    if (
-      !siteMenu?.contains(target) &&
-      !menuToggle?.contains(target)
-    ) {
+    if (!siteMenu?.contains(target) && !menuToggle?.contains(target)) {
       setMenuState(false);
     }
   });

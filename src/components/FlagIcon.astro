@@ -1,0 +1,51 @@
+---
+/**
+ * Drapeau du sélecteur de langue.
+ *
+ * Dessiné au trait, en `currentColor` : le reste de l'en-tête n'a que des
+ * icônes monochromes, un drapeau en couleur jurerait et supporterait mal le
+ * thème sombre. Les tracés reprennent les partitions du drapeau — trois bandes
+ * pour la France, croix et sautoir pour le Royaume-Uni — ce qui suffit à les
+ * distinguer sans une seule aplat de couleur.
+ *
+ * Purement décoratif : le libellé accessible est porté par le lien.
+ */
+
+import type { Lang } from "../i18n/utils";
+
+type Props = {
+  lang: Lang;
+  class?: string;
+};
+
+const { lang, class: className = "w-4 h-4" } = Astro.props;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <!-- Champ commun : proportions 3:2. -->
+  <rect x="2.5" y="5.5" width="19" height="13" rx="1"></rect>
+
+  {
+    lang === "fr" ? (
+      <>
+        <path d="M8.83 5.5v13" />
+        <path d="M15.17 5.5v13" />
+      </>
+    ) : (
+      <>
+        <path d="M12 5.5v13" />
+        <path d="M2.5 12h19" />
+        <path d="m3 6 18 12" />
+        <path d="m21 6-18 12" />
+      </>
+    )
+  }
+</svg>

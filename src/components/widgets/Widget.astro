@@ -10,7 +10,13 @@
  *     …
  *     <p slot="note">Source : …</p>
  *   </Widget>
+ *
+ * Les textes arrivent déjà traduits : c'est l'appelant qui choisit la langue.
  */
+
+import { getLangFromUrl, useTranslations } from "../../i18n/utils";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
 
 type Props = {
   title: string;
@@ -25,7 +31,7 @@ type Props = {
 const {
   title,
   href,
-  linkLabel = "tout voir",
+  linkLabel = t("widget.seeAll"),
   meta,
   class: className = "",
 } = Astro.props;

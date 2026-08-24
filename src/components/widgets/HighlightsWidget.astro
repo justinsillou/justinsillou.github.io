@@ -1,11 +1,19 @@
 ---
 import Widget from "./Widget.astro";
-import { highlights } from "../../data/highlights";
+import { getHighlights } from "../../data/highlights";
+import {
+  getLangFromUrl,
+  localizePath,
+  useTranslations,
+} from "../../i18n/utils";
 
 /**
  * Raccourci « à la une » : sélection manuelle, éditée dans
  * `src/data/highlights.ts`.
  */
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 type Props = {
   title?: string;
@@ -13,9 +21,18 @@ type Props = {
   class?: string;
 };
 
-const { title = "À la une", limit, class: className = "" } = Astro.props;
+const {
+  title = t("widget.highlights"),
+  limit,
+  class: className = "",
+} = Astro.props;
 
-const items = limit ? highlights.slice(0, limit) : highlights;
+const highlights = getHighlights(lang);
+
+const items = (limit ? highlights.slice(0, limit) : highlights).map((item) => ({
+  ...item,
+  href: item.external ? item.href : localizePath(lang, item.href),
+}));
 ---
 
 {

@@ -1,8 +1,14 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+---
+
 <button
   id="back-to-top"
   type="button"
-  aria-label="Retourner en haut de la page"
-  title="Retourner en haut"
+  aria-label={t("nav.backToTop")}
+  title={t("nav.backToTopTitle")}
   class="fixed bottom-4 right-4 z-50 w-9 h-9 hidden items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur text-neutral-500 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-900 dark:hover:text-neutral-100 transition-all duration-200"
 >
   <svg

@@ -4,7 +4,19 @@ import BaseFooter from "../components/BaseFooter.astro";
 import BarryAllen from "../components/BarryAllen.astro";
 import BackToTop from "../components/BackToTop.astro";
 import TerminalIsland from "../components/terminal/TerminalIsland";
-import { getCollection } from "astro:content";
+import { getPosts } from "../lib/blog";
+
+import {
+  alternateLinks,
+  formatDate,
+  getLangFromUrl,
+  localeTags,
+  localizePath,
+  ogLocales,
+  terminalStrings,
+  withBase,
+  useTranslations,
+} from "../i18n/utils";
 
 import "@fontsource/dm-sans/400.css";
 import "@fontsource/dm-sans/500.css";
@@ -19,32 +31,53 @@ type Props = {
   noindex?: boolean;
 };
 
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
 const {
   title,
-  description = "Justin Sillou — développeur back-end à Lille. Projets, notes et veille.",
+  description = t("site.description"),
   fullWidth = false,
   noindex = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const pageTitle = title ?? "Justin Sillou";
+
+// Les alternances de langue ne valent que pour une page indexable et réellement
+// traduite. La 404 n'existe qu'une fois (GitHub Pages ne sert qu'un 404.html) :
+// annoncer /en/404 pointerait vers une adresse qui n'est pas générée.
+const alternates = noindex ? [] : alternateLinks(Astro.url, Astro.site);
+const pageTitle = title ?? t("site.name");
 
 // Les articles sont injectés dans la palette de commandes (Ctrl + K) pour
 // qu'elle serve aussi de recherche dans le blog.
-const posts = (await getCollection("blog", ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
-  .map((post) => ({
-    title: post.data.title,
-    href: `/blog/${post.id}`,
-    tags: post.data.tags,
-    date: post.data.pubDate.toLocaleDateString("fr-FR", {
-      month: "short",
-      year: "numeric",
-    }),
-  }));
+const posts = (await getPosts(lang)).map(({ entry, slug }) => ({
+  title: entry.data.title,
+  href: localizePath(lang, `/blog/${slug}`),
+  tags: entry.data.tags,
+  date: formatDate(entry.data.pubDate, lang, {
+    month: "short",
+    year: "numeric",
+  }),
+}));
+
+// La palette est une île React : elle ne peut pas importer les dictionnaires
+// côté serveur, on lui passe donc ses chaînes et les chemins déjà préfixés.
+// Seules les clés qu'elle utilise partent dans le HTML.
+const strings = terminalStrings(lang);
+
+const terminalPaths = {
+  home: localizePath(lang, "/"),
+  now: localizePath(lang, "/now"),
+  projects: localizePath(lang, "/projets"),
+  blog: localizePath(lang, "/blog"),
+  cv: localizePath(lang, "/cv"),
+  changelog: localizePath(lang, "/changelog"),
+  otherLang: localizePath(lang === "fr" ? "en" : "fr", Astro.url.pathname),
+};
 ---
 
-<html lang="fr" class="scroll-smooth">
+<html lang={lang} class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -54,13 +87,29 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
 
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href={withBase("/favicon.ico")} sizes="any" />
     <link
       rel="alternate"
       type="application/rss+xml"
-      title="Justin Sillou — Blog"
-      href="/rss.xml"
+      title={t("site.rssTitle")}
+      href={localizePath(lang, "/rss.xml")}
     />
+
+    {
+      alternates.map((alternate) => (
+        <link
+          rel="alternate"
+          hreflang={alternate.hreflang}
+          href={alternate.href}
+        />
+      ))
+    }
+
+    {
+      alternates.length > 0 && (
+        <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
+      )
+    }
 
     {noindex && <meta name="robots" content="noindex" />}
 
@@ -68,7 +117,16 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale" content={ogLocales[lang]} />
+
+    {
+      alternates
+        .filter((alternate) => alternate.lang !== lang)
+        .map((alternate) => (
+          <meta property="og:locale:alternate" content={localeTags[alternate.lang].replace("-", "_")} />
+        ))
+    }
+
     <meta name="twitter:card" content="summary" />
 
     <script is:inline>
@@ -115,9 +173,12 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
 
     <BackToTop />
 
-    <TerminalIsland client:load posts={posts} />
-
-    {/* <AidesBubble /> — pour le réactiver, réimporter le composant en tête */}
+    <TerminalIsland
+      client:load
+      posts={posts}
+      strings={strings}
+      paths={terminalPaths}
+    />
 
     <BarryAllen />
 

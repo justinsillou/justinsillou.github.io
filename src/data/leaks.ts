@@ -15,11 +15,26 @@ import snapshot from "./leaks-snapshot.json";
  *
  * En contrepartie, les données datent du dernier build : c'est le workflow
  * GitHub Actions qui les rafraîchit.
+ *
+ * C'est une source tierce : elle est traitée comme telle. La réponse est
+ * plafonnée en taille, le nombre d'entrées et la longueur des champs le sont
+ * aussi. Le rendu passe par Astro, qui échappe le HTML — mais rien n'oblige
+ * une source externe à rester raisonnable, et le build ne doit pas pouvoir
+ * être mis à genoux par une réponse aberrante.
  */
 
 const FEED_URL = "https://bonjourlafuite.eu.org/feed.xml";
 export const LEAKS_SOURCE_URL = "https://bonjourlafuite.eu.org/";
 export const LEAKS_SOURCE_NAME = "C'est qui qui a fuité aujourd'hui ?";
+
+/** Le flux fait ~6 Ko : un mégaoctet laisse une marge très large. */
+const MAX_FEED_BYTES = 1_048_576;
+
+/** Au-delà, c'est que le flux a changé de nature — on n'en garde pas plus. */
+const MAX_ITEMS = 200;
+
+const MAX_ORGANIZATION_LENGTH = 120;
+const MAX_VOLUME_LENGTH = 80;
 
 export type Leak = {
   organization: string;
@@ -29,10 +44,15 @@ export type Leak = {
   status: "confirmed" | "claimed";
   /** Volume annoncé, quand il l'est. */
   volume?: string;
-  /** Données exposées, telles que décrites par la source. */
-  data: string[];
   /** Données sensibles au sens de l'article 9 du RGPD. */
   sensitive: boolean;
+};
+
+/** Résultat de la lecture du flux, avec l'origine réelle des données. */
+export type LeaksResult = {
+  leaks: Leak[];
+  /** `true` quand le flux est injoignable et qu'on sert l'instantané local. */
+  stale: boolean;
 };
 
 const decode = (value: string) =>
@@ -45,16 +65,16 @@ const decode = (value: string) =>
     .replace(/&amp;/g, "&")
     .trim();
 
+const clamp = (value: string, max: number) =>
+  value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
+
 const first = (source: string, pattern: RegExp) =>
   source.match(pattern)?.[1]?.trim() ?? "";
 
-const all = (source: string, pattern: RegExp) =>
-  [...source.matchAll(pattern)].map((match) => decode(match[1]));
-
 function parseFeed(xml: string): Leak[] {
-  const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(
-    (match) => match[1],
-  );
+  const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)]
+    .slice(0, MAX_ITEMS)
+    .map((match) => match[1]);
 
   return items.flatMap((item) => {
     const rawTitle = first(item, /<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/);
@@ -80,24 +100,55 @@ function parseFeed(xml: string): Leak[] {
 
     return [
       {
-        organization,
+        organization: clamp(organization, MAX_ORGANIZATION_LENGTH),
         date: Number.isNaN(timestamp.getTime())
           ? rawDate
           : timestamp.toISOString().slice(0, 10),
         status,
-        volume: volume || undefined,
-        data: all(description, /<li>([\s\S]*?)<\/li>/g).map((entry) =>
-          entry.replace(/<[^>]+>/g, ""),
-        ),
+        volume: volume ? clamp(volume, MAX_VOLUME_LENGTH) : undefined,
         sensitive: /<category>\s*sensitive\s*<\/category>/.test(item),
       } satisfies Leak,
     ];
   });
 }
 
-let cache: Promise<Leak[]> | null = null;
+/**
+ * Lit la réponse en s'arrêtant net au-delà de `MAX_FEED_BYTES`.
+ *
+ * `response.text()` chargerait tout en mémoire avant de pouvoir vérifier
+ * quoi que ce soit : on compte les octets au fil de l'eau.
+ */
+async function readCapped(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
 
-async function loadLeaks(): Promise<Leak[]> {
+  if (!reader) return (await response.text()).slice(0, MAX_FEED_BYTES);
+
+  const decoder = new TextDecoder();
+
+  let text = "";
+  let bytes = 0;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+
+    if (done) break;
+
+    bytes += value.byteLength;
+
+    if (bytes > MAX_FEED_BYTES) {
+      await reader.cancel();
+      throw new Error(`flux au-delà de ${MAX_FEED_BYTES} octets`);
+    }
+
+    text += decoder.decode(value, { stream: true });
+  }
+
+  return text + decoder.decode();
+}
+
+let cache: Promise<LeaksResult> | null = null;
+
+async function loadLeaks(): Promise<LeaksResult> {
   try {
     const response = await fetch(FEED_URL, {
       signal: AbortSignal.timeout(8000),
@@ -106,31 +157,33 @@ async function loadLeaks(): Promise<Leak[]> {
 
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const leaks = parseFeed(await response.text());
+    const leaks = parseFeed(await readCapped(response));
 
     if (leaks.length === 0) throw new Error("flux vide ou format inattendu");
 
-    return leaks;
+    return { leaks, stale: false };
   } catch (error) {
     // Une source tierce indisponible ne doit pas casser le build : on retombe
-    // sur l'instantané versionné, en le signalant dans les logs.
+    // sur l'instantané versionné, en le signalant dans les logs *et* dans la
+    // page — afficher la date du build sur des données figées serait mentir.
     console.warn(
       `[leaks] flux injoignable (${
         error instanceof Error ? error.message : error
       }), utilisation de l'instantané local.`,
     );
 
-    return snapshot as Leak[];
+    return { leaks: snapshot as Leak[], stale: true };
   }
 }
 
 /** Les `limit` fuites les plus récentes, de la plus récente à la plus ancienne. */
-export async function getLatestLeaks(limit = 8): Promise<Leak[]> {
+export async function getLatestLeaks(limit = 8): Promise<LeaksResult> {
   cache ??= loadLeaks();
 
-  const leaks = await cache;
+  const { leaks, stale } = await cache;
 
-  return [...leaks]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, limit);
+  return {
+    leaks: [...leaks].sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit),
+    stale,
+  };
 }

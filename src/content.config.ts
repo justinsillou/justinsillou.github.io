@@ -5,9 +5,13 @@ import { z } from "zod";
 /**
  * Blog.
  *
- * Un article = un fichier Markdown dans `src/content/blog/`.
- * Le nom du fichier devient l'URL : `fuites-de-donnees-france.md`
- * → `/blog/fuites-de-donnees-france`.
+ * Un article = un fichier Markdown dans un dossier de langue :
+ * `src/content/blog/fr/fuites-de-donnees-france.md` → `/blog/fuites-de-donnees-france`,
+ * `src/content/blog/en/fuites-de-donnees-france.md` → `/en/blog/fuites-de-donnees-france`.
+ *
+ * Le nom de fichier est donc l'identifiant commun aux traductions. La lecture
+ * passe par `src/lib/blog.ts`, qui retombe sur le français si une traduction
+ * manque.
  *
  * Ce format est volontairement simple : un script peut ajouter ou
  * mettre à jour un fichier (alimentation semi-automatique) sans rien

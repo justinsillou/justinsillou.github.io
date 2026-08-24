@@ -242,3 +242,37 @@
 .miroir body {
   transform: scaleX(-1);
 }
+
+/* ---------------------------------------------------------------------------
+   Pastilles de compétences du CV
+
+   La teinte est posée en `--skill-hue` par la page (dérivée du nom de la
+   techno, donc stable d'un build à l'autre et identique en français comme en
+   anglais). La saturation et la luminosité, elles, dépendent du thème : une
+   même teinte ne peut pas être lisible à la fois sur blanc et sur presque
+   noir.
+
+   Valeurs choisies pour que la pire teinte du cercle chromatique reste
+   au-dessus du seuil WCAG AA (4,5:1) :
+     — clair  : L 28 %  ->  pire cas 4,80:1 (jaune)
+     — sombre : L 68 %  ->  pire cas 5,26:1 (bleu)
+--------------------------------------------------------------------------- */
+
+:root {
+  --skill-saturation: 65%;
+  --skill-lightness: 28%;
+}
+
+.dark {
+  --skill-lightness: 68%;
+}
+
+.cv-skill {
+  color: hsl(var(--skill-hue) var(--skill-saturation) var(--skill-lightness));
+}
+
+.cv-skill-dot {
+  background-color: hsl(
+    var(--skill-hue) var(--skill-saturation) var(--skill-lightness)
+  );
+}

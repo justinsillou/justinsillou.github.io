@@ -1,35 +1,84 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { localeList, localizePath, ui } from "../i18n/utils";
+
+/**
+ * Page 404.
+ *
+ * GitHub Pages ne sert qu'un seul `404.html` pour tout le domaine : impossible
+ * de savoir dans quelle langue le visiteur cherchait. Elle est donc affichée
+ * dans les deux, en commençant par le français.
+ */
+
+const [primary, ...others] = localeList;
 
 const links = [
-  { label: "Accueil", href: "/" },
-  { label: "Now", href: "/now" },
-  { label: "Projets", href: "/projets" },
-  { label: "Blog", href: "/blog" },
-];
+  { key: "nav.home", path: "/" },
+  { key: "nav.now", path: "/now" },
+  { key: "nav.projects", path: "/projets" },
+  { key: "nav.blog", path: "/blog" },
+] as const;
 ---
 
-<BaseLayout title="Page introuvable — Justin Sillou" noindex>
+<BaseLayout
+  title={`${ui[primary]["notfound.pageTitle"]} — ${ui[primary]["site.name"]}`}
+  noindex
+>
   <div class="text-center">
     <p class="cv-mono text-xs text-neutral-400 dark:text-neutral-500">404</p>
 
-    <h1 class="mt-3 text-3xl font-bold">Cette page n'existe pas</h1>
+    <h1 class="mt-3 text-3xl font-bold">
+      {ui[primary]["notfound.title"]}
+    </h1>
 
     <p class="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
-      Le lien est peut-être obsolète — le site a été refondu.
+      {ui[primary]["notfound.text"]}
     </p>
 
-    <nav class="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2" aria-label="Pages du site">
+    {
+      others.map((lang) => (
+        <p
+          lang={lang}
+          class="mt-2 text-sm text-neutral-400 dark:text-neutral-500"
+        >
+          {ui[lang]["notfound.text"]}
+        </p>
+      ))
+    }
+
+    <nav
+      class="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2"
+      aria-label={ui[primary]["notfound.pages"]}
+    >
       {
         links.map((link) => (
           <a
-            href={link.href}
+            href={localizePath(primary, link.path)}
             class="cv-mono text-xs text-neutral-500 underline underline-offset-4 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
           >
-            {link.label}
+            {ui[primary][link.key]}
           </a>
         ))
       }
     </nav>
+
+    {
+      others.map((lang) => (
+        <nav
+          lang={lang}
+          class="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-2"
+          aria-label={ui[lang]["notfound.pages"]}
+        >
+          {links.map((link) => (
+            <a
+              href={localizePath(lang, link.path)}
+              class="cv-mono text-xs text-neutral-400 underline underline-offset-4 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-100"
+            >
+              {ui[lang][link.key]}
+            </a>
+          ))}
+        </nav>
+      ))
+    }
   </div>
 </BaseLayout>

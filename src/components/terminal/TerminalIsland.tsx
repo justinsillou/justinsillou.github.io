@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { normalize } from "./normalize";
+import type { TerminalKey } from "../../i18n/ui";
 
 /**
  * Terminal minimal.
@@ -11,6 +12,10 @@ import { normalize } from "./normalize";
  *
  * La liste couvre les pages du site et les articles du blog, ce qui en fait
  * aussi la recherche du site. Les articles sont fournis par BaseLayout.
+ *
+ * Cette île est rendue côté client : elle ne peut pas lire les dictionnaires
+ * au moment du rendu. BaseLayout lui passe donc les chaînes de la langue
+ * courante (`strings`) et les chemins déjà préfixés (`paths`).
  */
 
 export type PostEntry = {
@@ -18,6 +23,17 @@ export type PostEntry = {
   href: string;
   tags: string[];
   date: string;
+};
+
+export type TerminalPaths = {
+  home: string;
+  now: string;
+  projects: string;
+  blog: string;
+  cv: string;
+  changelog: string;
+  /** La page courante dans l'autre langue. */
+  otherLang: string;
 };
 
 type Group = "pages" | "articles" | "actions";
@@ -38,16 +54,14 @@ const goTo = (href: string) => () => {
   window.location.href = href;
 };
 
-const GROUP_LABELS: Record<Group, string> = {
-  pages: "Pages",
-  articles: "Articles",
-  actions: "Actions",
-};
-
 export default function TerminalIsland({
   posts = [],
+  strings,
+  paths,
 }: {
   posts?: PostEntry[];
+  strings: Record<TerminalKey, string>;
+  paths: TerminalPaths;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -56,23 +70,59 @@ export default function TerminalIsland({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const t = useMemo(
+    () =>
+      (key: TerminalKey, params?: Record<string, string>) => {
+        const raw = strings[key] ?? key;
+
+        if (!params) return raw;
+
+        return raw.replace(/\{(\w+)\}/g, (match, name: string) =>
+          name in params ? params[name] : match,
+        );
+      },
+    [strings],
+  );
+
+  const groupLabels: Record<Group, string> = useMemo(
+    () => ({
+      pages: t("terminal.group.pages"),
+      articles: t("terminal.group.posts"),
+      actions: t("terminal.group.actions"),
+    }),
+    [t],
+  );
+
   const commands = useMemo<Command[]>(
     () => [
-      { name: "accueil", hint: "/", group: "pages", run: goTo("/") },
-      { name: "now", hint: "/now", group: "pages", run: goTo("/now") },
       {
-        name: "projets",
-        hint: "/projets",
+        name: t("terminal.cmd.home"),
+        hint: paths.home,
         group: "pages",
-        run: goTo("/projets"),
+        keywords: "accueil home /",
+        run: goTo(paths.home),
       },
-      { name: "blog", hint: "/blog", group: "pages", run: goTo("/blog") },
-      { name: "cv", hint: "/cv", group: "pages", run: goTo("/cv") },
+      { name: "now", hint: paths.now, group: "pages", run: goTo(paths.now) },
+      {
+        name: t("nav.projects").toLowerCase(),
+        hint: paths.projects,
+        group: "pages",
+        keywords: "projets projects",
+        run: goTo(paths.projects),
+      },
+      { name: "blog", hint: paths.blog, group: "pages", run: goTo(paths.blog) },
+      {
+        name: "cv",
+        hint: paths.cv,
+        group: "pages",
+        keywords: "resume résumé",
+        run: goTo(paths.cv),
+      },
       {
         name: "changelog",
-        hint: "/changelog",
+        hint: paths.changelog,
         group: "pages",
-        run: goTo("/changelog"),
+        run: goTo(paths.changelog),
       },
 
       ...posts.map<Command>((post) => ({
@@ -96,21 +146,27 @@ export default function TerminalIsland({
         run: goTo("https://www.linkedin.com/in/justinsillou/"),
       },
       {
+        name: "lang",
+        hint: t("terminal.cmd.language"),
+        group: "actions",
+        keywords: "langue language français english fr en",
+        run: goTo(paths.otherLang),
+      },
+      {
         name: "theme",
-        hint: "basculer clair / sombre",
+        hint: t("terminal.cmd.theme"),
         group: "actions",
         run: () => {
           const isDark = document.documentElement.classList.toggle("dark");
           localStorage.setItem("theme", isDark ? "dark" : "light");
-          return isDark ? "Thème sombre." : "Thème clair.";
+          return isDark ? t("terminal.themeDark") : t("terminal.themeLight");
         },
       },
       {
         name: "about",
-        hint: "en une ligne",
+        hint: t("terminal.cmd.about"),
         group: "actions",
-        run: () =>
-          "Justin Sillou — développeur back-end à Lille. PHP, TypeScript, un peu de tout le reste.",
+        run: () => t("terminal.about"),
       },
       {
         name: "nitsuj",
@@ -123,13 +179,11 @@ export default function TerminalIsland({
 
           localStorage.setItem("miroir", miroir ? "1" : "0");
 
-          return miroir
-            ? "ǝɹıoɹıɯ uǝ ǝʇıS — retapez nitsuj pour revenir."
-            : "Retour à l'endroit.";
+          return miroir ? t("terminal.mirrorOn") : t("terminal.mirrorOff");
         },
       },
     ],
-    [posts],
+    [posts, paths, t],
   );
 
   const matches = useMemo(() => {
@@ -156,7 +210,7 @@ export default function TerminalIsland({
 
   const execute = (command: Command | undefined) => {
     if (!command) {
-      setMessage(`Aucun résultat pour : ${value.trim()}`);
+      setMessage(t("terminal.noResultsFor", { query: value.trim() }));
       return;
     }
 
@@ -224,7 +278,7 @@ export default function TerminalIsland({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          aria-label="Ouvrir le terminal (Ctrl + K)"
+          aria-label={t("terminal.open")}
           title="Ctrl + K"
           className="cv-mono fixed bottom-5 left-5 z-40 hidden h-8 w-8 select-none items-center justify-center text-sm text-neutral-300 transition-colors hover:text-neutral-600 md:flex dark:text-neutral-700 dark:hover:text-neutral-400"
         >
@@ -242,7 +296,7 @@ export default function TerminalIsland({
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Recherche et navigation"
+            aria-label={t("terminal.dialog")}
             className="fixed left-1/2 top-[18vh] z-50 w-[min(36rem,calc(100vw-3rem))] -translate-x-1/2 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-950"
           >
             <form
@@ -264,8 +318,8 @@ export default function TerminalIsland({
                 type="text"
                 autoComplete="off"
                 spellCheck={false}
-                placeholder="page, article, commande…"
-                aria-label="Recherche"
+                placeholder={t("terminal.placeholder")}
+                aria-label={t("terminal.input")}
                 className="cv-mono w-full border-none bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-300 dark:text-neutral-100 dark:placeholder:text-neutral-700"
               />
 
@@ -283,7 +337,7 @@ export default function TerminalIsland({
             <ul className="max-h-[22rem] overflow-y-auto border-t border-neutral-100 py-1 dark:border-neutral-900">
               {matches.length === 0 && (
                 <li className="cv-mono px-4 py-3 text-xs text-neutral-400 dark:text-neutral-600">
-                  aucun résultat
+                  {t("terminal.noResults")}
                 </li>
               )}
 
@@ -292,7 +346,7 @@ export default function TerminalIsland({
                   {/* En-tête affiché au premier élément de chaque groupe. */}
                   {matches[index - 1]?.group !== command.group && (
                     <p className="cv-mono px-4 pb-1 pt-3 text-[10px] uppercase text-neutral-300 dark:text-neutral-700">
-                      {GROUP_LABELS[command.group]}
+                      {groupLabels[command.group]}
                     </p>
                   )}
 

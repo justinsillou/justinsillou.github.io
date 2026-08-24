@@ -1,14 +1,31 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import WidgetGrid from "../components/widgets/WidgetGrid.astro";
-import LeaksWidget from "../components/widgets/LeaksWidget.astro";
-import HighlightsWidget from "../components/widgets/HighlightsWidget.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import WidgetGrid from "../../components/widgets/WidgetGrid.astro";
+import LeaksWidget from "../../components/widgets/LeaksWidget.astro";
+import HighlightsWidget from "../../components/widgets/HighlightsWidget.astro";
+
+import {
+  localePaths,
+  localizePath,
+  STORIES_QUOTE,
+  useTranslations,
+  type Lang,
+} from "../../i18n/utils";
+
+export const getStaticPaths = () => localePaths();
+
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
 
 const links = [
-  { label: "Now", href: "/now", hint: "ce que je fais en ce moment" },
-  { label: "Projets", href: "/projets", hint: "perso et universitaires" },
-  { label: "Blog", href: "/blog", hint: "notes et veille" },
-  { label: "CV", href: "/cv", hint: "parcours détaillé" },
+  { label: t("nav.now"), href: localizePath(lang, "/now"), hint: t("home.hint.now") },
+  {
+    label: t("nav.projects"),
+    href: localizePath(lang, "/projets"),
+    hint: t("home.hint.projects"),
+  },
+  { label: t("nav.blog"), href: localizePath(lang, "/blog"), hint: t("home.hint.blog") },
+  { label: t("nav.cv"), href: localizePath(lang, "/cv"), hint: t("home.hint.cv") },
 ];
 
 const externalLinks = [
@@ -29,27 +46,31 @@ const externalLinks = [
         <h1
           class="text-4xl sm:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100"
         >
-          Justin Sillou
+          {t("site.name")}
         </h1>
 
         <p
           class="mt-3 sm:mt-4 text-base sm:text-lg text-neutral-500 dark:text-neutral-400"
         >
-          Développeur back-end — Lille
+          {t("home.role")}
         </p>
 
         <p
           class="mt-6 max-w-2xl text-sm sm:text-base leading-relaxed text-neutral-500 dark:text-neutral-400"
         >
-          J'écris surtout du back-end : API, outils internes, un peu d'infra. Ce
-          site est volontairement statique et léger — quelques pages, pas de
-          tracker.
+          {t("home.intro")}
+        </p>
+
+        <p
+          class="mt-4 max-w-2xl text-sm sm:text-base leading-relaxed text-neutral-500 italic dark:text-neutral-400"
+        >
+          {t("home.introAside")}
         </p>
 
         <!-- Sections : deux colonnes plutôt qu'une pile -->
         <nav
           class="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-x-8 border-t border-neutral-200 dark:border-neutral-800"
-          aria-label="Sections du site"
+          aria-label={t("home.sections")}
         >
           {
             links.map((link) => (
@@ -86,9 +107,21 @@ const externalLinks = [
           <span
             class="hidden cv-mono text-xs text-neutral-300 md:inline dark:text-neutral-700"
           >
-            Ctrl + K pour chercher dans le site
+            {t("home.shortcut")}
           </span>
         </div>
+
+        <!--
+          Clin d'œil : Doctor Who, « The Big Bang » (2010).
+          Volontairement discret et non traduit — il se voit surtout à la
+          sélection, ou en survolant la ligne.
+        -->
+        <p
+          lang="en"
+          class="mt-16 cv-mono text-[11px] leading-relaxed text-neutral-200 transition-colors duration-500 select-all dark:text-neutral-900"
+        >
+          {STORIES_QUOTE}
+        </p>
       </div>
 
       <!-- Colonne des raccourcis : ajouter d'autres <Widget> à la volée -->

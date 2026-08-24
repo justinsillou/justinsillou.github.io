@@ -1,0 +1,64 @@
+---
+/**
+ * « À venir » — la colonne qui accompagne le changelog.
+ *
+ * Volontairement pauvre : pas de date, pas de case à cocher, pas de
+ * pourcentage. Une idée livrée quitte cette liste pour le journal des
+ * versions, c'est tout le suivi qu'il y a à faire.
+ *
+ * Le contenu vit dans `src/data/roadmap.ts`. Une liste vide masque le bloc.
+ */
+
+import { getRoadmap } from "../data/roadmap";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const items = getRoadmap(lang);
+---
+
+{
+  items.length > 0 && (
+    <section aria-labelledby="roadmap-title">
+      <h2
+        id="roadmap-title"
+        class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+      >
+        {t("changelog.roadmap")}
+      </h2>
+
+      <ul class="space-y-3">
+        {items.map((item) => (
+          <li class="flex gap-3 text-sm leading-relaxed">
+            <span
+              class:list={[
+                "shrink-0",
+                item.soon
+                  ? "text-neutral-400 dark:text-neutral-500"
+                  : "text-neutral-200 dark:text-neutral-800",
+              ]}
+              aria-hidden="true"
+            >
+              —
+            </span>
+
+            <span
+              class:list={
+                item.soon
+                  ? "text-neutral-700 dark:text-neutral-300"
+                  : "text-neutral-400 dark:text-neutral-600"
+              }
+            >
+              {item.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p class="mt-6 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
+        {t("changelog.roadmapNote")}
+      </p>
+    </section>
+  )
+}

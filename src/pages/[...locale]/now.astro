@@ -1,20 +1,26 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import {
-  nowSections,
-  nowUpdatedAt,
-  nowLocation,
-  nowIntro,
-} from "../data/now";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getNow, nowUpdatedAt } from "../../data/now";
 
-const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-});
+import {
+  formatDate,
+  localePaths,
+  localizePath,
+  useTranslations,
+  type Lang,
+} from "../../i18n/utils";
+
+export const getStaticPaths = () => localePaths();
+
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const { intro, location, sections } = getNow(lang);
+
+const formattedDate = formatDate(nowUpdatedAt, lang);
 ---
 
-<BaseLayout title="Now — Justin Sillou" fullWidth>
+<BaseLayout title={`${t("now.title")} — ${t("site.name")}`} fullWidth>
   <div
     class="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-14 sm:py-20 lg:py-28"
   >
@@ -22,13 +28,13 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
       <h1
         class="text-4xl sm:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100"
       >
-        Now
+        {t("now.title")}
       </h1>
 
       <p
         class="mt-3 sm:mt-4 text-base sm:text-lg leading-relaxed text-neutral-500 dark:text-neutral-400"
       >
-        {nowIntro}
+        {intro}
       </p>
     </header>
 
@@ -38,7 +44,7 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
       <!-- Colonne principale -->
       <div class="min-w-0 space-y-14 lg:space-y-16">
         {
-          nowSections.map((section) => (
+          sections.map((section) => (
             <section>
               <h2 class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-6">
                 {section.title}
@@ -55,7 +61,7 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
                   <li>
                     {item.href ? (
                       <a
-                        href={item.href}
+                        href={localizePath(lang, item.href)}
                         class="text-base sm:text-lg text-neutral-900 underline underline-offset-4 hover:opacity-70 dark:text-neutral-100"
                       >
                         {item.label}
@@ -85,11 +91,11 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
           <h2
             class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-3"
           >
-            Où
+            {t("now.where")}
           </h2>
 
           <p class="text-sm text-neutral-600 dark:text-neutral-300">
-            {nowLocation}
+            {location}
           </p>
         </div>
 
@@ -97,7 +103,7 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
           <h2
             class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-3"
           >
-            Mise à jour
+            {t("now.updated")}
           </h2>
 
           <p class="text-sm text-neutral-600 dark:text-neutral-300">
@@ -105,18 +111,23 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
             <span
               id="now-freshness"
               data-date={nowUpdatedAt}
+              data-today={t("now.freshness.today")}
+              data-yesterday={t("now.freshness.yesterday")}
+              data-days={t("now.freshness.days")}
+              data-months={t("now.freshness.months")}
+              data-years={t("now.freshness.years")}
               class="text-neutral-400 dark:text-neutral-500"></span>
           </p>
         </div>
 
         <p class="text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
-          Page inspirée du <a
+          {t("now.inspiredBefore")}<a
             href="https://nownownow.com/about"
             target="_blank"
             rel="noopener noreferrer"
             class="underline underline-offset-4 hover:text-neutral-900 dark:hover:text-neutral-100"
-            >/now movement</a
-          > de Derek Sivers.
+            >{t("now.inspiredLink")}</a
+          >{t("now.inspiredAfter")}
         </p>
       </aside>
     </div>
@@ -125,25 +136,27 @@ const formattedDate = new Date(nowUpdatedAt).toLocaleDateString("fr-FR", {
 
 <script>
   // Indicateur de fraîcheur : « il y a 12 jours ».
+  // Les formats viennent du serveur pour rester dans la langue de la page.
   const el = document.getElementById("now-freshness");
   const raw = el?.dataset.date;
 
   if (el && raw) {
-    const days = Math.floor(
-      (Date.now() - new Date(raw).getTime()) / 86_400_000,
-    );
+    const days = Math.floor((Date.now() - new Date(raw).getTime()) / 86_400_000);
+
+    const fill = (template: string | undefined, count: number) =>
+      (template ?? "").replace("{count}", String(count));
 
     const label =
       days <= 0
-        ? "aujourd'hui"
+        ? (el.dataset.today ?? "")
         : days === 1
-          ? "hier"
+          ? (el.dataset.yesterday ?? "")
           : days < 31
-            ? `il y a ${days} jours`
+            ? fill(el.dataset.days, days)
             : days < 365
-              ? `il y a ${Math.floor(days / 30)} mois`
-              : `il y a ${Math.floor(days / 365)} an${days >= 730 ? "s" : ""}`;
+              ? fill(el.dataset.months, Math.floor(days / 30))
+              : fill(el.dataset.years, Math.floor(days / 365));
 
-    el.textContent = ` (${label})`;
+    if (label) el.textContent = ` (${label})`;
   }
 </script>

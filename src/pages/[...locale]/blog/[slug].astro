@@ -1,43 +1,57 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection, render } from "astro:content";
-import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { render } from "astro:content";
 import type { GetStaticPaths } from "astro";
-import LeaksWidget from "../../components/widgets/LeaksWidget.astro";
-import ShareButton from "../../components/ShareButton.astro";
+import LeaksWidget from "../../../components/widgets/LeaksWidget.astro";
+import ShareButton from "../../../components/ShareButton.astro";
+
+import { getPosts, withNeighbours, type Post } from "../../../lib/blog";
+
+import {
+  defaultLang,
+  formatDate,
+  localeList,
+  localeTags,
+  localizePath,
+  useTranslations,
+  type Lang,
+  type UIKey,
+} from "../../../i18n/utils";
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  // Un gabarit, deux langues : chaque locale fournit sa propre liste, avec
+  // repli sur le français quand la traduction manque.
+  const perLocale = await Promise.all(
+    localeList.map(async (lang) => ({
+      lang,
+      posts: withNeighbours(await getPosts(lang)),
+    })),
   );
 
-  return posts.map((post, index) => ({
-    params: { slug: post.id },
-    props: {
-      post,
-      // Les articles sont triés du plus récent au plus ancien : le suivant
-      // dans le tableau est donc le précédent dans le temps.
-      older: posts[index + 1],
-      newer: posts[index - 1],
-    },
-  }));
+  return perLocale.flatMap(({ lang, posts }) =>
+    posts.map(({ post, older, newer }) => ({
+      params: {
+        locale: lang === defaultLang ? undefined : lang,
+        slug: post.slug,
+      },
+      props: { lang, post, older, newer },
+    })),
+  );
 };
 
 type Props = {
-  post: CollectionEntry<"blog">;
-  older?: CollectionEntry<"blog">;
-  newer?: CollectionEntry<"blog">;
+  lang: Lang;
+  post: Post;
+  older?: Post;
+  newer?: Post;
 };
 
-const { post, older, newer } = Astro.props as Props;
-const { Content, headings } = await render(post);
+const { lang, post: current, older, newer } = Astro.props as Props;
+const t = useTranslations(lang);
 
-const formatDate = (date: Date) =>
-  date.toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+const post = current.entry;
+
+const { Content, headings } = await render(post);
 
 const readingTime = Math.max(
   1,
@@ -46,18 +60,10 @@ const readingTime = Math.max(
 
 // Seuls les h2 alimentent le sommaire : suffisant, et ça reste lisible.
 const toc = headings.filter((heading) => heading.depth === 2);
-
-const AI_LABELS: Record<string, string> = {
-  none: "Écrit sans outil d'IA.",
-  research: "Recherche documentaire assistée par IA, rédaction humaine.",
-  editing: "Rédaction humaine, relecture assistée par IA.",
-  drafting:
-    "Première version rédigée avec une IA, reprise et vérifiée à la main.",
-};
 ---
 
 <BaseLayout
-  title={`${post.data.title} — Justin Sillou`}
+  title={`${post.data.title} — ${t("site.name")}`}
   description={post.data.description}
   fullWidth
 >
@@ -69,10 +75,10 @@ const AI_LABELS: Record<string, string> = {
   >
     <header class="mb-12 sm:mb-14 lg:mb-20 max-w-4xl">
       <a
-        href="/blog"
+        href={localizePath(lang, "/blog")}
         class="cv-mono text-xs text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-neutral-100"
       >
-        ← blog
+        {t("post.back")}
       </a>
 
       <h1
@@ -91,12 +97,12 @@ const AI_LABELS: Record<string, string> = {
         class="mt-6 flex max-w-3xl flex-wrap items-center gap-x-3 gap-y-2 cv-mono text-xs text-neutral-400 dark:text-neutral-500"
       >
         <time datetime={post.data.pubDate.toISOString()}>
-          {formatDate(post.data.pubDate)}
+          {formatDate(post.data.pubDate, lang)}
         </time>
 
         <span aria-hidden="true">·</span>
 
-        <span>{readingTime} min de lecture</span>
+        <span>{t("post.readingTime", { count: readingTime })}</span>
 
         {
           post.data.tags.map((tag) => (
@@ -112,7 +118,9 @@ const AI_LABELS: Record<string, string> = {
       {
         post.data.updatedDate && (
           <p class="mt-3 cv-mono text-xs text-emerald-600 dark:text-emerald-400">
-            Mis à jour le {formatDate(post.data.updatedDate)}
+            {t("post.updatedOn", {
+              date: formatDate(post.data.updatedDate, lang),
+            })}
           </p>
         )
       }
@@ -123,7 +131,15 @@ const AI_LABELS: Record<string, string> = {
     >
       <!-- Article -->
       <div class="min-w-0 max-w-3xl lg:order-1 order-2">
-        <article class="prose-simple">
+        {
+          current.fallback && (
+            <p class="mb-8 rounded-lg border border-neutral-200 px-4 py-3 text-sm text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+              {t("post.notTranslated")}
+            </p>
+          )
+        }
+
+        <article class="prose-simple" lang={localeTags[current.lang]}>
           <Content />
         </article>
 
@@ -132,7 +148,7 @@ const AI_LABELS: Record<string, string> = {
         {
           post.data.ai && (
             <p class="mt-10 cv-mono text-xs text-neutral-400 dark:text-neutral-500">
-              {AI_LABELS[post.data.ai]}
+              {t(`post.ai.${post.data.ai}` as UIKey)}
             </p>
           )
         }
@@ -141,17 +157,20 @@ const AI_LABELS: Record<string, string> = {
         {
           (older || newer) && (
             <nav
-              aria-label="Autres articles"
+              aria-label={t("post.otherPosts")}
               class="mt-14 grid grid-cols-1 gap-6 border-t border-neutral-200 pt-8 sm:grid-cols-2 dark:border-neutral-800"
             >
               {newer ? (
-                <a href={`/blog/${newer.id}`} class="group">
+                <a
+                  href={localizePath(lang, `/blog/${newer.slug}`)}
+                  class="group"
+                >
                   <span class="cv-mono text-xs text-neutral-400 dark:text-neutral-500">
-                    ← plus récent
+                    {t("post.newer")}
                   </span>
 
                   <span class="mt-2 block text-sm text-neutral-900 underline-offset-4 group-hover:underline dark:text-neutral-100">
-                    {newer.data.title}
+                    {newer.entry.data.title}
                   </span>
                 </a>
               ) : (
@@ -159,13 +178,16 @@ const AI_LABELS: Record<string, string> = {
               )}
 
               {older && (
-                <a href={`/blog/${older.id}`} class="group sm:text-right">
+                <a
+                  href={localizePath(lang, `/blog/${older.slug}`)}
+                  class="group sm:text-right"
+                >
                   <span class="cv-mono text-xs text-neutral-400 dark:text-neutral-500">
-                    plus ancien →
+                    {t("post.older")}
                   </span>
 
                   <span class="mt-2 block text-sm text-neutral-900 underline-offset-4 group-hover:underline dark:text-neutral-100">
-                    {older.data.title}
+                    {older.entry.data.title}
                   </span>
                 </a>
               )}
@@ -180,9 +202,9 @@ const AI_LABELS: Record<string, string> = {
       >
         {
           toc.length > 1 && (
-            <nav aria-label="Sommaire">
+            <nav aria-label={t("post.tocAria")}>
               <h2 class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-4">
-                Sommaire
+                {t("post.toc")}
               </h2>
 
               <ol class="space-y-3 text-sm">
@@ -209,7 +231,7 @@ const AI_LABELS: Record<string, string> = {
           post.data.sources.length > 0 && (
             <section>
               <h2 class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-4">
-                Sources
+                {t("post.sources")}
               </h2>
 
               <ul class="space-y-3 text-sm">

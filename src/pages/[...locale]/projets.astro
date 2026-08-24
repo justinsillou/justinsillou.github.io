@@ -1,9 +1,28 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { projectsByDate, projectCategories } from "../data/projects";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  categoryKeys,
+  getProjects,
+  projectCategories,
+} from "../../data/projects";
+
+import {
+  localePaths,
+  localizePath,
+  useTranslations,
+  type Lang,
+  type UIKey,
+} from "../../i18n/utils";
+
+export const getStaticPaths = () => localePaths();
+
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const projects = getProjects(lang);
 ---
 
-<BaseLayout title="Projets — Justin Sillou" fullWidth>
+<BaseLayout title={`${t("projects.title")} — ${t("site.name")}`} fullWidth>
   <div
     class="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-14 sm:py-20 lg:py-28"
   >
@@ -11,18 +30,17 @@ import { projectsByDate, projectCategories } from "../data/projects";
       <h1
         class="text-4xl sm:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100"
       >
-        Projets
+        {t("projects.title")}
       </h1>
 
       <p
         class="mt-3 sm:mt-4 text-base sm:text-lg text-neutral-500 dark:text-neutral-400"
       >
-        Projets personnels et universitaires. Le travail réalisé en entreprise
-        est détaillé sur la <a
-          href="/cv"
+        {t("projects.introBefore")}<a
+          href={localizePath(lang, "/cv")}
           class="underline underline-offset-4 hover:text-neutral-900 dark:hover:text-neutral-100"
-          >page CV</a
-        >.
+          >{t("projects.introLink")}</a
+        >{t("projects.introAfter")}
       </p>
     </header>
 
@@ -36,7 +54,7 @@ import { projectsByDate, projectCategories } from "../data/projects";
           class="divide-y divide-neutral-200 dark:divide-neutral-800"
         >
           {
-            projectsByDate.map((project) => (
+            projects.map((project) => (
               <li class="project-item" data-category={project.category}>
                 <details class="group py-7 sm:py-8">
                   <summary class="flex cursor-pointer list-none items-baseline gap-6 sm:gap-8 [&::-webkit-details-marker]:hidden">
@@ -48,7 +66,7 @@ import { projectsByDate, projectCategories } from "../data/projects";
 
                         {project.status === "en-cours" && (
                           <span class="cv-mono text-[10px] uppercase text-emerald-600 dark:text-emerald-400">
-                            en cours
+                            {t("projects.ongoing")}
                           </span>
                         )}
                       </span>
@@ -114,7 +132,7 @@ import { projectsByDate, projectCategories } from "../data/projects";
           id="projects-empty"
           class="hidden py-10 text-sm text-neutral-400 dark:text-neutral-500"
         >
-          Aucun projet avec ce filtre.
+          {t("projects.empty")}
         </p>
       </div>
 
@@ -123,13 +141,13 @@ import { projectsByDate, projectCategories } from "../data/projects";
         <h2
           class="cv-mono text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
         >
-          Filtrer
+          {t("projects.filter")}
         </h2>
 
         <div
           class="flex flex-wrap items-center gap-2"
           role="group"
-          aria-label="Filtrer les projets"
+          aria-label={t("projects.filterAria")}
         >
           <button
             type="button"
@@ -137,7 +155,7 @@ import { projectsByDate, projectCategories } from "../data/projects";
             aria-pressed="true"
             class="filter-btn cv-mono text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 transition-colors"
           >
-            tous
+            {t("projects.all")}
           </button>
 
           {
@@ -148,7 +166,7 @@ import { projectsByDate, projectCategories } from "../data/projects";
                 aria-pressed="false"
                 class="filter-btn cv-mono text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800 transition-colors"
               >
-                {category.toLowerCase()}
+                {t(categoryKeys[category] as UIKey)}
               </button>
             ))
           }
@@ -158,8 +176,10 @@ import { projectsByDate, projectCategories } from "../data/projects";
           id="projects-count"
           class="mt-5 cv-mono text-xs text-neutral-400 dark:text-neutral-500"
           aria-live="polite"
+          data-one={t("projects.countOne")}
+          data-many={t("projects.count")}
         >
-          {projectsByDate.length} projets
+          {t("projects.count", { count: projects.length })}
         </p>
       </aside>
     </div>
@@ -200,7 +220,11 @@ import { projectsByDate, projectCategories } from "../data/projects";
     });
 
     if (count) {
-      count.textContent = `${visible} projet${visible > 1 ? "s" : ""}`;
+      // Les deux formes viennent du serveur : le script ignore la langue.
+      const template =
+        (visible > 1 ? count.dataset.many : count.dataset.one) ?? "";
+
+      count.textContent = template.replace("{count}", String(visible));
     }
 
     empty?.classList.toggle("hidden", visible > 0);
@@ -220,6 +244,7 @@ import { projectsByDate, projectCategories } from "../data/projects";
   });
 
   // Filtre initial : ?filtre=Mobile permet de partager une vue filtrée.
+  // La valeur reste la même dans les deux langues, seul le libellé change.
   const initial = new URL(window.location.href).searchParams.get("filtre");
   const known = [...buttons].some((button) => button.dataset.filter === initial);
 

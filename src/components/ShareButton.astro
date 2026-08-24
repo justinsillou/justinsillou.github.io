@@ -5,7 +5,14 @@
  * Pas de widget tiers, donc pas de tracker : on utilise le partage natif du
  * navigateur quand il existe (mobile surtout), et une copie du lien dans le
  * presse-papiers sinon. Aucune requête réseau dans les deux cas.
+ *
+ * Les trois libellés (repos, succès, échec) sont posés en `data-…` : le
+ * script reste identique quelle que soit la langue.
  */
+
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const t = useTranslations(getLangFromUrl(Astro.url));
 
 type Props = {
   title: string;
@@ -22,16 +29,20 @@ const { title, class: className = "" } = Astro.props;
     className,
   ]}
   data-title={title}
-  data-label="partager"
+  data-label={t("post.share")}
+  data-copied={t("post.shareCopied")}
+  data-failed={t("post.shareFailed")}
 >
-  partager
+  {t("post.share")}
 </button>
 
 <script>
   document
     .querySelectorAll<HTMLButtonElement>(".share-button")
     .forEach((button) => {
-      const label = button.dataset.label ?? "partager";
+      const label = button.dataset.label ?? "";
+      const copied = button.dataset.copied ?? label;
+      const failed = button.dataset.failed ?? label;
 
       const flash = (text: string) => {
         button.textContent = text;
@@ -56,9 +67,9 @@ const { title, class: className = "" } = Astro.props;
 
         try {
           await navigator.clipboard.writeText(url);
-          flash("lien copié");
+          flash(copied);
         } catch {
-          flash("copie impossible");
+          flash(failed);
         }
       });
     });

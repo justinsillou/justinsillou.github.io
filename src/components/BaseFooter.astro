@@ -1,29 +1,42 @@
 ---
-import { changelog } from "../data/changelog";
+import { latestRelease } from "../data/changelog";
 import EcoBadge from "./EcoBadge.astro";
-//import ReadingSizeToggle from "./ReadingSizeToggle.astro";
 
-const latest = changelog[0];
+import {
+  formatDate,
+  getLangFromUrl,
+  localizePath,
+  useTranslations,
+} from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
 const year = new Date().getFullYear();
+
+const lastUpdate = t("footer.lastUpdate", {
+  date: formatDate(latestRelease.date, lang, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }),
+  version: latestRelease.version,
+});
 ---
 
 <footer
   class="shrink-0 max-w-md mx-auto mb-8 mt-20 flex flex-col items-center gap-4 px-6 text-center text-xs text-neutral-400"
 >
   <a
-    href="/changelog"
+    href={localizePath(lang, "/changelog")}
     class="hover:text-neutral-900 dark:hover:text-neutral-100 hover:underline"
   >
-    Dernière mise à jour : {latest.date} — v{latest.version}
+    {lastUpdate}
   </a>
 
   <EcoBadge />
 
-  <div class="flex flex-wrap items-center justify-center gap-4">
-    {/* <ReadingSizeToggle /> */}
-  </div>
-
   <p class="text-neutral-300 dark:text-neutral-700">
-    © {year} Justin Sillou
+    © {year} {t("site.name")}
   </p>
 </footer>

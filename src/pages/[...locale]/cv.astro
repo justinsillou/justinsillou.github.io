@@ -1,0 +1,405 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+import { getCv } from "../../data/cv";
+import { localePaths, useTranslations, type Lang } from "../../i18n/utils";
+
+export const getStaticPaths = () => localePaths();
+
+const { lang } = Astro.props as { lang: Lang };
+const t = useTranslations(lang);
+
+const {
+  periods,
+  education,
+  skillGroups,
+  softSkillList,
+  languages,
+  interests,
+  additionalInfo,
+  skillList,
+} = getCv(lang);
+
+/**
+ * Une teinte par techno.
+ *
+ * Les teintes sont réparties sur le cercle chromatique dans l'ordre
+ * alphabétique : le résultat est identique à chaque build et dans les deux
+ * langues — `skillList` ne contient que des noms de technos, qui ne se
+ * traduisent pas. Un tirage aléatoire donnait une couleur différente entre
+ * /cv et /en/cv, et changeait à chaque reconstruction quotidienne.
+ *
+ * Seule la teinte est décidée ici : saturation et luminosité viennent du
+ * thème (`.cv-skill` dans `global.css`), sans quoi la moitié des teintes
+ * passaient sous le seuil de contraste WCAG AA dans l'un des deux thèmes.
+ */
+const orderedSkills = [...skillList].sort();
+
+const skillHues = new Map<string, number>(
+  orderedSkills.map((skill, index) => [
+    skill,
+    Math.round((index * 360) / orderedSkills.length),
+  ]),
+);
+
+function skillStyle(skill: string): string {
+  return `--skill-hue: ${skillHues.get(skill) ?? 0}`;
+}
+---
+
+<BaseLayout title={`${t("cv.title")} — ${t("site.name")}`} fullWidth>
+  <div
+    class="cv-page w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 xl:px-20 py-14 sm:py-20 lg:py-28"
+  >
+    <!-- En-tête -->
+    <header class="mb-14 sm:mb-16 lg:mb-24 max-w-3xl">
+      <h1
+        class="cv-serif text-4xl sm:text-5xl lg:text-6xl text-neutral-900 dark:text-neutral-100"
+      >
+        {t("cv.title")}
+      </h1>
+
+      <p
+        class="mt-3 sm:mt-4 text-base sm:text-lg text-neutral-500 dark:text-neutral-400"
+      >
+        {t("cv.role")}
+      </p>
+    </header>
+
+    <div
+      class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-16 lg:gap-24"
+    >
+      <!-- Colonne principale -->
+      <div class="min-w-0 space-y-20 lg:space-y-24">
+        <!-- Expérience -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-10"
+          >
+            {t("cv.experience")}
+          </h2>
+
+          <div class="relative lg:pl-20">
+            <!-- Ligne verticale desktop -->
+            <div
+              class="hidden lg:block absolute left-5 top-4 bottom-4 w-px bg-neutral-200 dark:bg-neutral-800"
+            >
+            </div>
+
+            <div class="space-y-14 lg:space-y-16">
+              {
+                periods.map((group) => (
+                  <div class="relative">
+                    <!-- Timeline desktop -->
+                    <div class="hidden lg:flex absolute -left-20 top-1 w-10 flex-col items-center">
+                      <span class="relative z-10 w-2.5 h-2.5 rounded-full bg-neutral-900 dark:bg-neutral-100" />
+                    </div>
+
+                    <!-- Date mobile -->
+                    <h3 class="lg:hidden cv-section-title text-xs uppercase text-neutral-400 dark:text-neutral-500 border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-6">
+                      {group.label}
+                    </h3>
+
+                    <!-- Date desktop -->
+                    <h3 class="hidden lg:block cv-serif text-xl lg:text-2xl text-neutral-900 dark:text-neutral-100 border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-8">
+                      {group.label}
+                    </h3>
+
+                    <!-- Expériences -->
+                    <div class="divide-y divide-neutral-200 dark:divide-neutral-800">
+                      {group.items.map((exp) => (
+                        <article class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-x-8 gap-y-4 py-7 sm:py-8 first:pt-0">
+                          <!-- Contenu -->
+                          <div class="min-w-0">
+                            <h4 class="text-base sm:text-lg lg:text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+                              {exp.role}
+                            </h4>
+
+                            <p class="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 mt-1">
+                              {exp.company}
+
+                              <span class="hidden sm:inline"> · </span>
+
+                              <span class="block sm:inline">{exp.contract}</span>
+
+                              <span class="hidden sm:inline"> · </span>
+
+                              <span class="block sm:inline">{exp.location}</span>
+                            </p>
+
+                            {exp.projects && exp.projects.length > 0 ? (
+                              <div class="mt-6 space-y-5">
+                                {exp.projects.map((project, index) => (
+                                  <div
+                                    class={`experience-project ${
+                                      index > 0
+                                        ? "pt-5 border-t border-neutral-100 dark:border-neutral-900"
+                                        : ""
+                                    }`}
+                                  >
+                                    <div class="flex items-center gap-3">
+                                      <span class="w-1.5 h-1.5 rounded-full bg-neutral-900 dark:bg-neutral-100 shrink-0" />
+
+                                      <h5 class="cv-section-title text-xs sm:text-sm font-medium uppercase text-neutral-800 dark:text-neutral-200">
+                                        {project.name}
+                                      </h5>
+
+                                      {project.name === "MailSecure" && (
+                                        <span class="text-[10px] sm:text-xs cv-mono uppercase text-neutral-400 dark:text-neutral-500">
+                                          {t("cv.product")}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-2 max-w-2xl leading-relaxed">
+                                      {project.description}
+                                    </p>
+
+                                    {project.tags && project.tags.length > 0 && (
+                                      <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2 mt-3">
+                                        {project.tags.map((tag) => (
+                                          <span
+                                            class="cv-skill cv-mono inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm whitespace-nowrap"
+                                            style={skillStyle(tag)}
+                                          >
+                                            <span class="cv-skill-dot w-2 h-2 rounded-full shrink-0" />
+
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <>
+                                {exp.note && (
+                                  <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-2 max-w-2xl">
+                                    {exp.note}
+                                  </p>
+                                )}
+
+                                {exp.tags && exp.tags.length > 0 && (
+                                  <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2 mt-4">
+                                    {exp.tags.map((tag) => (
+                                      <span
+                                        class="cv-skill cv-mono inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm whitespace-nowrap"
+                                        style={skillStyle(tag)}
+                                      >
+                                        <span class="cv-skill-dot w-2 h-2 rounded-full shrink-0" />
+
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
+                            )}
+
+                            {exp.projects && exp.note && (
+                              <p class="text-sm text-neutral-400 dark:text-neutral-500 mt-4 max-w-2xl">
+                                {exp.note}
+                              </p>
+                            )}
+
+                            <!-- Soft skills -->
+                            {exp.softSkills && exp.softSkills.length > 0 && (
+                              <div class="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2 mt-4">
+                                {exp.softSkills.map((skill) => (
+                                  <span class="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600 shrink-0" />
+
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <!-- Dates -->
+                          <div class="cv-mono text-xs sm:text-sm text-neutral-400 dark:text-neutral-500 sm:text-right sm:whitespace-nowrap border-t sm:border-t-0 border-neutral-100 dark:border-neutral-900 pt-3 sm:pt-0">
+                            <p>{exp.period}</p>
+                            <p>{exp.duration}</p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Formation -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-10"
+          >
+            {t("cv.education")}
+          </h2>
+
+          <div class="divide-y divide-neutral-200 dark:divide-neutral-800">
+            {
+              education.map((edu) => (
+                <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4 sm:gap-8 py-6 first:pt-0">
+                  <div>
+                    <h4 class="text-base sm:text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                      {edu.degree}
+                    </h4>
+
+                    <p class="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 mt-1">
+                      {edu.school}
+                    </p>
+                  </div>
+
+                  {edu.link && (
+                    <a
+                      href={edu.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="cv-mono self-start sm:self-auto text-xs sm:text-sm text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 underline underline-offset-4 whitespace-nowrap transition-colors"
+                    >
+                      {t("cv.diploma")}
+                    </a>
+                  )}
+                </div>
+              ))
+            }
+          </div>
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="lg:sticky lg:top-16 h-fit space-y-12 lg:space-y-14">
+        <!-- Stack -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-6"
+          >
+            {t("cv.stack")}
+          </h2>
+
+          <div class="space-y-6">
+            {
+              skillGroups.map((group) => (
+                <div>
+                  <h3 class="cv-mono text-[10px] sm:text-xs uppercase text-neutral-400 dark:text-neutral-500 mb-3">
+                    {group.title}
+                  </h3>
+
+                  <ul class="flex flex-wrap gap-x-4 gap-y-3 lg:flex-col lg:gap-3">
+                    {group.skills.map((skill) => (
+                      <li class="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 whitespace-nowrap">
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <!-- Compétences transversales -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+          >
+            {t("cv.softSkills")}
+          </h2>
+
+          <ul class="flex flex-wrap gap-x-4 gap-y-3 lg:flex-col lg:gap-3">
+            {
+              softSkillList.map((skill) => (
+                <li class="inline-flex items-center gap-2 whitespace-nowrap">
+                  <span class="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600 shrink-0" />
+
+                  <span class="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300">
+                    {skill}
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <!-- Langues -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+          >
+            {t("cv.languages")}
+          </h2>
+
+          <div class="space-y-3">
+            {
+              languages.map((language) => (
+                <div class="flex items-baseline justify-between gap-4">
+                  <span class="text-sm text-neutral-900 dark:text-neutral-100">
+                    {language.name}
+                  </span>
+
+                  <span class="cv-mono text-xs text-neutral-400 dark:text-neutral-500 text-right">
+                    {language.level}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <!-- Centres d'intérêt -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+          >
+            {t("cv.interests")}
+          </h2>
+
+          <div class="space-y-4">
+            {
+              interests.map((interest) => (
+                <div>
+                  <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    {interest.title}
+                  </h3>
+
+                  <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">
+                    {interest.description}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <!-- Informations complémentaires -->
+        <section>
+          <h2
+            class="cv-section-title text-xs sm:text-sm uppercase text-neutral-400 dark:text-neutral-500 mb-5"
+          >
+            {t("cv.additional")}
+          </h2>
+
+          <div class="space-y-4">
+            {
+              additionalInfo.map((info) => (
+                <div>
+                  <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                    {info.title}
+                  </h3>
+
+                  <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    {info.description}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
