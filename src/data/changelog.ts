@@ -25,6 +25,20 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: "1.1.1",
+    date: "2026-08-28",
+    title: {
+      fr: "Ajout des auteurs dans la liste de lecture",
+      en: "Added authors to the reading list",
+    },
+    changes: [
+      {
+        fr: "Ajout d'une section auteur dans les livres lus ou en cours",
+        en: "Added author information to books currently being read or already read",
+      },
+    ],
+  },
+  {
     version: "1.1.0",
     date: "2026-08-24",
     title: {
