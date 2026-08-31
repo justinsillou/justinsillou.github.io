@@ -59,18 +59,26 @@ const formattedDate = formatDate(nowUpdatedAt, lang);
               <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6">
                 {section.items.map((item) => (
                   <li>
-                    {item.href ? (
-                      <a
-                        href={localizePath(lang, item.href)}
-                        class="text-base sm:text-lg text-neutral-900 underline underline-offset-4 hover:opacity-70 dark:text-neutral-100"
-                      >
-                        {item.label}
-                      </a>
-                    ) : (
-                      <span class="text-base sm:text-lg text-neutral-900 dark:text-neutral-100">
-                        {item.label}
-                      </span>
-                    )}
+                    <div class="flex flex-wrap items-baseline gap-x-2">
+                      {item.href ? (
+                        <a
+                          href={localizePath(lang, item.href)}
+                          class="text-base sm:text-lg text-neutral-900 underline underline-offset-4 hover:opacity-70 dark:text-neutral-100"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <span class="text-base sm:text-lg text-neutral-900 dark:text-neutral-100">
+                          {item.label}
+                        </span>
+                      )}
+
+                      {item.author && (
+                        <span class="text-sm italic text-neutral-400 dark:text-neutral-500">
+                          {item.author}
+                        </span>
+                      )}
+                    </div>
 
                     {item.detail && (
                       <p class="mt-1 max-w-2xl text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">

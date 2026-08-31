@@ -22,6 +22,7 @@ export type NowItem = {
   label: string;
   detail?: string;
   /** Chemin canonique (celui du français), préfixé à l'affichage. */
+  author?: string;
   href?: string;
 };
 
@@ -32,7 +33,7 @@ export type NowContent = {
 };
 
 /** Format ISO (AAAA-MM-JJ). Commun aux deux langues. */
-export const nowUpdatedAt = "2026-08-22";
+export const nowUpdatedAt = "2026-08-28";
 
 export const nowByLang: Record<Lang, NowContent> = {
   fr: {
@@ -81,8 +82,14 @@ export const nowByLang: Record<Lang, NowContent> = {
           },
           {
             label: "Sur la piste du bonheur",
+            author: "Ludovic Fleche",
             detail:
-              "Second livre de Ludovic Fleche, amis runners ce livre est fait pour vous",
+              "Amis runners ce livre est fait pour vous",
+          },
+          {
+            label: "Docker Deep Dive",
+            author: "Nigel Plouton",
+            detail: "Lecture de la version 2025 restée de coté quelques temps",
           },
         ],
       },
@@ -154,8 +161,14 @@ export const nowByLang: Record<Lang, NowContent> = {
           },
           {
             label: "Sur la piste du bonheur",
+            author: "Ludovic Fleche",
             detail:
-              "Ludovic Fleche's second book — fellow runners, this one is for you",
+              "Fellow runners, this one is for you",
+          },
+          {
+            label: "Docker Deep Dive",
+            author: "Nigel Plouton",
+            detail: "Reading the 2025 edition, which had been sitting on the shelf for a while",
           },
         ],
       },
