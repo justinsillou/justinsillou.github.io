@@ -88,7 +88,7 @@ export const nowByLang: Record<Lang, NowContent> = {
           },
           {
             label: "Docker Deep Dive",
-            author: "Nigel Plouton",
+            author: "Nigel Poulton",
             detail: "Lecture de la version 2025 restée de coté quelques temps",
           },
         ],
