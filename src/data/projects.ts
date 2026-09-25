@@ -56,8 +56,34 @@ export type Project = {
 };
 
 const SOURCE_CODE: Localized = { fr: "Code source", en: "Source code" };
+const DEMO: Localized = { fr: "Démonstration en ligne", en: "Online demo" };
 
 export const projects: ProjectSource[] = [
+  {
+    slug: "rbs",
+    title: { fr: "Vulgarisation de Rubik's Cube", en: "Rubik's Cube Vulgarization" },
+    summary: {
+      fr: "Solveur de Rubik's Cube en ligne [v0.1], vulgarisation de la théorie des graphes et algorithmes de résolution.",
+      en: "Online Rubik's Cube solver [v0.1], vulgarizing graph theory and solving algorithms.",
+    },
+    details: {
+      fr: "Mini projet : interface web pour calcul de la solution et affichage du chemin de résolution.",
+      en: "Mini project: web interface to compute the solution and display the solving path.",
+    },
+    period: { fr: "Août / Septembre 2026", en: "August / September 2026" },
+    sortKey: 2026,
+    context: { fr: "Mini projet", en: "Mini project" },
+    category: "Web",
+    tags: ["JavaScript", "Graphes", "Algorithmes"],
+    status: "termine",
+    links: [
+      {
+        label: DEMO,
+        href: "https://justinsillou.github.io/rbs/",
+      },
+    ],
+  },
+
   {
     slug: "site-perso",
     title: { fr: "Site personnel", en: "Personal website" },
