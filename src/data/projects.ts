@@ -79,7 +79,7 @@ export const projects: ProjectSource[] = [
     links: [
       {
         label: DEMO,
-        href: "https://justinsillou.github.io/rbs/",
+        href: "https://justinsillou.github.io/rubiks-graph-solver/",
       },
     ],
   },
