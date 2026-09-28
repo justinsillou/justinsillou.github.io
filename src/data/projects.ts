@@ -63,8 +63,8 @@ export const projects: ProjectSource[] = [
     slug: "rbs",
     title: { fr: "Vulgarisation de Rubik's Cube", en: "Rubik's Cube Vulgarization" },
     summary: {
-      fr: "Solveur de Rubik's Cube en ligne [v0.1], vulgarisation de la théorie des graphes et algorithmes de résolution.",
-      en: "Online Rubik's Cube solver [v0.1], vulgarizing graph theory and solving algorithms.",
+      fr: "Solveur de Rubik's Cube en ligne, vulgarisation de la théorie des graphes et algorithmes de résolution.",
+      en: "Online Rubik's Cube solver, vulgarizing graph theory and solving algorithms.",
     },
     details: {
       fr: "Mini projet : interface web pour calcul de la solution et affichage du chemin de résolution.",
