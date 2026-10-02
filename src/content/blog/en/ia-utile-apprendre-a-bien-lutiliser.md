@@ -3,7 +3,6 @@ title: "Using AI for real: what a Rubik's Cube taught me"
 description: "A Rubik's Cube solver built with an AI, and above all what I learned along the way: staying critical, citing sources, cross-checking them, and saying what you delegated."
 pubDate: 2026-09-29
 tags: ["AI", "Learning", "Method"]
-draft: true
 ai: drafting
 sources:
   - label: "The project: Rubik's Graph Solver (demo)"

@@ -3,7 +3,6 @@ title: "Utiliser l'IA pour de bon : ce que m'a appris un Rubik's Cube"
 description: "Un solveur de Rubik's Cube construit avec une IA, et surtout ce que j'ai appris en route : rester critique, citer ses sources, les croiser, et dire ce qu'on a délégué."
 pubDate: 2026-09-29
 tags: ["IA", "Apprentissage", "Méthode"]
-draft: true
 ai: drafting
 sources:
   - label: "Le projet : Rubik's Graph Solver (démo)"
