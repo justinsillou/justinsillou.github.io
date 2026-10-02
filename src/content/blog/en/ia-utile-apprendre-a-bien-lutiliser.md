@@ -96,6 +96,28 @@ My simple reflexes:
   reruns after every change.
 - I **reread everything that will be published**. Always.
 
+### One AI can reread another
+
+Once the site was done, I had another AI reread the page's mathematical content,
+asking it to cross-check every number. It found no error of substance, but five
+points to fix:
+
+- **Inconsistent counters**: “twisted corners 5 → 7” went up while “flipped
+  edges” went down. I switched everything to “well oriented”.
+- **A metaphor presented as a theorem**: “discrete analogue of Noether's
+  theorem”. It's an image, not a mathematical statement. The text now says so.
+- **An overstated bound**: “every solution takes at most 30 moves” only holds if
+  each phase is optimal. My solver limits its search time, so it isn't
+  guaranteed.
+- **A vague sentence** about the 25-move scramble, which I hadn't measured. I
+  removed it.
+- **An unconfirmed number** (the diameter of one of the small graphs). Rather
+  than trust the AI or the reviewer, I reran the computation: it was right.
+
+Two lessons. A second opinion helps, even from an AI. And when a point can be
+checked, **compute it** instead of choosing whom to believe. The reviewer also
+said itself what it could not confirm.
+
 ## Citing sources
 
 Two reasons.

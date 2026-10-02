@@ -96,6 +96,29 @@ Mes réflexes, simples :
   mathématique. Il se relance à chaque modification.
 - Je **relis tout ce qui sera publié**. Toujours.
 
+### Une IA peut en relire une autre
+
+Une fois le site fini, j'ai fait relire le contenu mathématique de la page par
+une autre IA, en lui demandant de recouper chaque chiffre. Elle n'a trouvé
+aucune erreur de fond, mais cinq points à corriger :
+
+- **Des compteurs incohérents** : « coins tordus 5 → 7 » montait alors que
+  « arêtes retournées » descendait. J'ai tout mis en « bien orientés ».
+- **Une métaphore présentée comme un théorème** : « analogue discret du théorème
+  de Noether ». C'est une image, pas un énoncé mathématique. Le texte le dit
+  maintenant.
+- **Une borne trop affirmée** : « toute solution fait au plus 30 coups » n'est
+  vrai que si chaque phase est optimale. Mon solveur limite son temps de
+  recherche, donc ce n'est pas garanti.
+- **Une phrase vague** sur le mélange à 25 coups, que je n'avais pas mesurée.
+  Je l'ai retirée.
+- **Un chiffre non confirmé** (le diamètre de l'un des petits graphes). Plutôt
+  que de croire l'IA ou la relectrice, j'ai relancé le calcul : c'était bon.
+
+Deux leçons. Un second avis aide, y compris celui d'une IA. Et quand un point
+est vérifiable, **on le calcule** au lieu de choisir qui croire. La relectrice
+a d'ailleurs dit elle-même ce qu'elle n'avait pas pu confirmer.
+
 ## Citer ses sources
 
 Deux raisons.
