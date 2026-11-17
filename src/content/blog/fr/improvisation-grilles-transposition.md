@@ -202,6 +202,5 @@ C'est une méthode, pas une recette :
   accompagnement réaliste.
 
 C'est un **mini projet**, comme le [solveur de Rubik's
-Cube](/blog/ia-utile-apprendre-a-bien-lutiliser) ou les [doigtés pour
-cuivres](/blog/doigtes-cuivres-musescore) : peu de code, sans dépendance, et
+Cube](/blog/ia-utile-apprendre-a-bien-lutiliser) : peu de code, sans dépendance, et
 qui se [teste en ligne](https://justinsillou.github.io/impro/).

@@ -89,35 +89,6 @@ export const projects: ProjectSource[] = [
   },
 
   {
-    slug: "doigtes-cuivres",
-    title: { fr: "Doigtés pour cuivres", en: "Brass fingerings" },
-    summary: {
-      fr: "Ajoute automatiquement les doigtés (pistons, positions de coulisse) à une partition MuseScore, directement dans le navigateur.",
-      en: "Automatically adds fingerings (valves, slide positions) to a MuseScore score, right in the browser.",
-    },
-    details: {
-      fr: "Preuve de concept pour mon orchestre : trompette, trombone, euphonium, tuba. Les doigtés sont calculés à partir de la série d'harmoniques, et seules des balises <Fingering> sont ajoutées au fichier.",
-      en: "Proof of concept for my ensemble: trumpet, trombone, euphonium, tuba. Fingerings are computed from the harmonic series, and only <Fingering> tags are added to the file.",
-    },
-    period: { fr: "Octobre 2026", en: "October 2026" },
-    sortKey: 2026,
-    context: { fr: "Mini projet", en: "Mini project" },
-    category: "Web",
-    tags: ["JavaScript", "MuseScore", "Musique"],
-    status: "en-cours",
-    links: [
-      {
-        label: DEMO,
-        href: "https://justinsillou.github.io/msczv/",
-      },
-      {
-        label: SOURCE_CODE,
-        href: "https://github.com/justinsillou/msczv",
-      },
-    ],
-  },
-
-  {
     slug: "rbs",
     title: { fr: "Vulgarisation de Rubik's Cube", en: "Rubik's Cube Vulgarization" },
     summary: {
